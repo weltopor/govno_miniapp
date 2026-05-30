@@ -268,12 +268,12 @@ function showFlushAnim(num, isWin, cb) {
   anim.classList.remove('hidden');
 
   // 3. Фаза: крутилка через 400мс
-  const t1 = setTimeout(() => {
+  showFlushAnim._timers.push(setTimeout(() => {
     swirl.style.display = 'block';
-  }, 400);
+  }, 400));
 
   // 4. Фаза: результат через 1000мс
-  const t2 = setTimeout(() => {
+  showFlushAnim._timers.push(setTimeout(() => {
     swirl.style.display   = 'none';
     toilet.textContent    = isWin ? '💩' : '🪰';
     toilet.style.animation = 'none';
@@ -301,17 +301,17 @@ function showFlushAnim(num, isWin, cb) {
     } else {
       if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('warning');
     }
-  }, 1000);
+  }, 1000));
 
   // 5. Закрываем через 2600мс — достаточно чтобы прочитать результат
-  const t3 = setTimeout(() => {
-    // Чистим ВСЁ перед скрытием
-    inner.querySelectorAll('.fa-caption,.fa-prize').forEach(e => e.remove());
+  showFlushAnim._timers.push(setTimeout(() => {
+    inner.querySelectorAll('.fa-caption,.fa-prize,.fa-pobeda').forEach(e => e.remove());
     result.classList.add('hidden');
     toilet.textContent = '🚽';
     anim.classList.add('hidden');
-    cb(); // только теперь переходим к следующему ходу
-  }, 2600);
+    showFlushAnim._timers = [];
+    cb();
+  }, 2600));
 }
 
 function getPrizePercent(players, winIdx) {
@@ -471,9 +471,9 @@ function startGame() {
   document.getElementById('playerCount').textContent = `${GAME.players} игроков`;
   document.getElementById('bankVal').textContent     = PRIZE_POOL;
   document.getElementById('toiletInput').max         = TOTAL_BALLS;
-  bubuildGrid();
-buildQueue();
-showAttemptBanner(1, () => updateTurnUI());
+  buildGrid();
+  buildQueue();
+  showAttemptBanner(1, () => updateTurnUI());
 }
 
 document.addEventListener('DOMContentLoaded', runLoader);
