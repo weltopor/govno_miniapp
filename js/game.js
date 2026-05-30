@@ -40,6 +40,7 @@ let state = {
   timer:    30,
   timerRef: null,
   animating: false,   // ← флаг: идёт анимация смыва
+  prizes:   {},
 };
 
 // ── СЕТКА ──
@@ -203,6 +204,15 @@ function botMove() {
 function openBall(num, isMe) {
   const isWin = WINNERS.has(num);
   state.opened[num] = isWin ? 'won' : 'lost';
+  // Записываем реальный выигрыш
+  const order = state.attempt === 1 ? state.order : state.order2;
+  const pIdx  = order[state.curTurn];
+  if (isWin) {
+    const openedWins = Object.values(state.opened).filter(v => v === 'won').length;
+    const pct   = getPrizePercent(GAME.players, openedWins);
+    const prize = parseFloat((parseFloat(PRIZE_POOL) * pct / 100).toFixed(3));
+    state.prizes[pIdx] = (state.prizes[pIdx] || 0) + prize;
+  }
 
   if (isMe) {
     state.animating = true;
@@ -234,7 +244,7 @@ function showFlushAnim(num, isWin, cb) {
     showFlushAnim._timers.forEach(clearTimeout);
   }
   showFlushAnim._timers = [];
-  
+
   const anim   = document.getElementById('flushAnim');
   const inner  = anim.querySelector('.fa-inner');
   const toilet = document.getElementById('faToilet');
@@ -395,11 +405,11 @@ function showResults() {
   const screen = document.getElementById('resultsScreen');
   const table  = document.getElementById('rsTable');
 
-  const results = PLAYERS.map((name, i) => {
-    const won   = Math.random() > 0.45;
-    const prize = won ? parseFloat((parseFloat(PRIZE_POOL) * (5 + Math.random() * 15) / 100).toFixed(3)) : 0;
-    return { name, prize, isMe: i === GAME.myIndex };
-  }).sort((a, b) => b.prize - a.prize);
+  const results = PLAYERS.map((name, i) => ({
+    name,
+    prize: parseFloat((state.prizes[i] || 0).toFixed(3)),
+    isMe:  i === GAME.myIndex,
+  })).sort((a, b) => b.prize - a.prize);
 
   const me = results.find(r => r.isMe);
 
