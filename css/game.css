@@ -208,22 +208,36 @@
 .t-cell {
   aspect-ratio: 1;
   border-radius: 9px;
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
   border: 1px solid #3a2c18;
   background: #282010;
   cursor: pointer;
   transition: transform .1s, border-color .2s, background .2s;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
+  padding: 4px;
+}
+
+.t-cell .t-img {
+  object-fit: contain;
+  width: 65%;
+  height: 65%;
+  flex-shrink: 0;
 }
 
 .t-cell .t-emoji { line-height: 1; }
+
 .t-cell .t-num {
   font-family: var(--font-body);
-  color: #6a5030;
+  color: #a08050;
   line-height: 1;
-  margin-top: 2px;
+  font-size: 11px;
+  font-weight: 700;
+  text-shadow: 0 1px 2px rgba(0,0,0,.8);
 }
 
 /* Моя ячейка */
@@ -290,12 +304,13 @@
 /* ── ЗОНА ВВОДА ── */
 .input-zone {
   padding: 7px 12px 10px;
-  background: #221a0a;
   border-top: 1.5px solid var(--border-gold);
   flex-shrink: 0;
+  background: none;
   background-image: url('../img/ploshka_no_aktiv.png');
   background-size: 100% 100%;
   background-repeat: no-repeat;
+  position: relative;
 }
 
 .input-zone.has-selection {
