@@ -19,26 +19,26 @@
   display: flex; flex-direction: column;
   align-items: center; justify-content: center;
   background: var(--bg-deep);
-  gap: 10px;
+  gap: 12px; /* Увеличено */
   padding: 24px;
 }
 
 .loader-icon {
-  font-size: 52px;
+  font-size: 64px; /* Увеличено с 52px */
   animation: logoPulse 1.5s ease-in-out infinite;
-  margin-bottom: 4px;
+  margin-bottom: 6px; /* Увеличено */
 }
 
 .loader-title {
   font-family: var(--font-display);
-  font-size: 20px;
+  font-size: 24px; /* Увеличено с 20px */
   color: var(--gold-glow);
   font-weight: 900;
 }
 
 .loader-sub {
   font-family: var(--font-serif);
-  font-size: 13px;
+  font-size: 16px; /* Увеличено с 13px */
   color: var(--text-rust);
   font-style: italic;
 }
@@ -47,18 +47,18 @@
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 6px;
-  margin: 8px 0;
+  gap: 8px; /* Увеличено */
+  margin: 12px 0; /* Увеличено */
   max-width: 280px;
 }
 
 .lp-slot {
-  width: 36px; height: 36px;
+  width: 42px; height: 42px; /* Увеличено с 36px */
   border-radius: 50%;
   background: var(--bg-card2);
   border: 1.5px solid var(--border-rust);
   display: flex; align-items: center; justify-content: center;
-  font-size: 14px;
+  font-size: 16px; /* Увеличено */
   transition: border-color .3s, background .3s;
 }
 
@@ -75,24 +75,24 @@
 }
 
 .loader-bar {
-  width: 200px; height: 6px;
+  width: 220px; height: 8px; /* Увеличено */
   background: var(--bg-card2);
   border: 1px solid var(--border-rust);
-  border-radius: 3px;
+  border-radius: 4px; /* Увеличено */
   overflow: hidden;
 }
 
 .loader-fill {
   height: 100%;
   background: linear-gradient(90deg, var(--rust), var(--amber));
-  border-radius: 3px;
+  border-radius: 4px; /* Увеличено */
   transition: width .5s ease;
   width: 0%;
 }
 
 .loader-status {
   font-family: var(--font-body);
-  font-size: 11px;
+  font-size: 13px; /* Увеличено с 11px */
   color: var(--text-dim);
   letter-spacing: 1px;
 }
@@ -110,68 +110,68 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 12px;
+  padding: 10px 14px; /* Увеличено */
   background: linear-gradient(180deg, #1a1005 0%, rgba(16,10,4,.95) 100%);
   border-bottom: 1.5px solid var(--border-gold);
   flex-shrink: 0;
 }
 
-.gh-left { display: flex; align-items: center; gap: 8px; }
+.gh-left { display: flex; align-items: center; gap: 10px; /* Увеличено */ }
 
 .gh-num {
   font-family: var(--font-display);
-  font-size: 13px;
+  font-size: 16px; /* Увеличено с 13px */
   font-weight: 700;
   color: var(--gold-glow);
 }
 
 .gh-players {
   font-family: var(--font-body);
-  font-size: 10px;
+  font-size: 13px; /* Увеличено с 10px */
   color: var(--text-dim);
   background: var(--bg-card);
   border: .5px solid var(--border-rust);
   border-radius: 4px;
-  padding: 2px 6px;
+  padding: 3px 8px; /* Увеличено */
 }
 
 .gh-bank {
   display: flex;
   align-items: baseline;
-  gap: 3px;
+  gap: 5px; /* Увеличено */
 }
 
-.gh-bank-lbl { font-size: 9px; color: var(--text-dim); font-family: var(--font-body); }
+.gh-bank-lbl { font-size: 11px; /* Увеличено с 9px */ color: var(--text-dim); font-family: var(--font-body); }
 .gh-bank-val {
   font-family: var(--font-display);
-  font-size: 16px;
+  font-size: 20px; /* Увеличено с 16px */
   font-weight: 900;
   color: var(--gold-glow);
   text-shadow: 0 0 10px rgba(240,180,0,.4);
 }
-.gh-bank-cur { font-size: 9px; color: var(--gold-dim); font-family: var(--font-body); }
+.gh-bank-cur { font-size: 11px; /* Увеличено с 9px */ color: var(--gold-dim); font-family: var(--font-body); }
 
 /* ── ПОЛОСА ХОДА ── */
 .turn-strip {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 5px 12px;
+  padding: 6px 14px; /* Увеличено */
   background: var(--bg-card);
   border-bottom: 1px solid var(--border-rust);
   flex-shrink: 0;
 }
 
-.ts-left { display: flex; align-items: center; gap: 6px; }
-.ts-label { font-size: 10px; color: var(--text-dim); font-family: var(--font-body); }
+.ts-left { display: flex; align-items: center; gap: 8px; /* Увеличено */ }
+.ts-label { font-size: 12px; /* Увеличено с 10px */ color: var(--text-dim); font-family: var(--font-body); }
 .ts-player {
   font-family: var(--font-display);
-  font-size: 12px;
+  font-size: 14px; /* Увеличено с 12px */
   font-weight: 700;
   color: var(--gold-glow);
 }
 .ts-attempt {
-  font-size: 10px;
+  font-size: 12px; /* Увеличено с 10px */
   color: var(--text-rust);
   font-family: var(--font-serif);
   font-style: italic;
@@ -179,10 +179,10 @@
 
 .ts-timer {
   font-family: var(--font-display);
-  font-size: 16px;
+  font-size: 20px; /* Увеличено с 16px */
   font-weight: 900;
   color: var(--amber);
-  min-width: 28px;
+  min-width: 32px; /* Увеличено */
   text-align: center;
   transition: color .3s;
 }
@@ -190,7 +190,7 @@
 
 @keyframes timerPulse {
   0%, 100% { opacity: 1; }
-  50%       { opacity: .5; }
+  50%         { opacity: .5; }
 }
 
 /* ── СЕТКА УНИТАЗОВ ── */
@@ -198,14 +198,14 @@
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 8px 10px 4px;
+  padding: 10px 12px 6px; /* Увеличено */
   scrollbar-width: none;
 }
 .toilets-wrap::-webkit-scrollbar { display: none; }
 
 .toilet-grid {
   display: grid;
-  gap: 5px;
+  gap: 6px; /* Увеличено */
   width: 100%;
 }
 
@@ -218,7 +218,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  border: 1px solid #2a2010;
+  border: 1.5px solid #2a2010; /* Увеличено */
   background: var(--bg-card);
   cursor: pointer;
   position: relative;
@@ -227,12 +227,13 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-.t-cell .t-emoji { line-height: 1; }
+.t-cell .t-emoji { line-height: 1; font-size: 1.2em; /* Увеличено */ }
 .t-cell .t-num {
   font-family: var(--font-body);
   color: #4a3a20;
   line-height: 1;
-  margin-top: 2px;
+  margin-top: 3px; /* Увеличено */
+  font-size: 12px; /* Увеличено */
 }
 
 /* Мой ход — подсветка */
@@ -277,29 +278,29 @@
 
 /* ── ОЧЕРЕДЬ ── */
 .queue-bar {
-  padding: 4px 10px 5px;
+  padding: 6px 12px 6px; /* Увеличено */
   border-top: 1px solid var(--border-rust);
   background: rgba(0,0,0,.2);
   flex-shrink: 0;
 }
 
 .queue-label {
-  font-size: 8px;
+  font-size: 10px; /* Увеличено с 8px */
   color: var(--text-dim);
   letter-spacing: 1px;
   font-family: var(--font-body);
-  margin-bottom: 4px;
+  margin-bottom: 5px; /* Увеличено */
 }
 
 .queue-list {
   display: flex;
-  gap: 3px;
+  gap: 4px; /* Увеличено */
   flex-wrap: wrap;
 }
 
 .q-item {
-  font-size: 9px;
-  padding: 2px 5px;
+  font-size: 11px; /* Увеличено с 9px */
+  padding: 3px 6px; /* Увеличено */
   border-radius: 4px;
   font-family: var(--font-body);
   color: #3a3020;
@@ -318,34 +319,34 @@
 
 /* ── ЗОНА ВВОДА ── */
 .input-zone {
-  padding: 6px 10px 8px;
+  padding: 8px 12px 10px; /* Увеличено */
   background: var(--bg-card);
   border-top: 1.5px solid var(--border-gold);
   flex-shrink: 0;
 }
 
 .iz-hint {
-  font-size: 9px;
+  font-size: 11px; /* Увеличено с 9px */
   color: var(--text-dim);
   font-family: var(--font-serif);
   font-style: italic;
-  margin-bottom: 5px;
+  margin-bottom: 6px; /* Увеличено */
   text-align: center;
 }
 
 .iz-row {
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 6px; /* Увеличено */
 }
 
 .iz-minus, .iz-plus {
-  width: 36px; height: 36px;
+  width: 40px; height: 40px; /* Увеличено с 36px */
   border-radius: 6px;
   background: var(--bg-card2);
   border: 1px solid var(--border-rust);
   color: var(--text-rust);
-  font-size: 18px;
+  font-size: 22px; /* Увеличено */
   line-height: 1;
   cursor: pointer;
   transition: border-color .15s, background .15s;
@@ -358,13 +359,13 @@
 
 .iz-input {
   flex: 1;
-  height: 36px;
+  height: 40px; /* Увеличено с 36px */
   background: #0e0a06;
   border: 1.5px solid var(--border-rust);
   border-radius: 7px;
   color: var(--gold-glow);
   font-family: var(--font-display);
-  font-size: 18px;
+  font-size: 20px; /* Увеличено с 18px */
   font-weight: 700;
   text-align: center;
   outline: none;
@@ -380,14 +381,14 @@
 }
 
 .iz-flush {
-  height: 36px;
-  padding: 0 14px;
+  height: 40px; /* Увеличено с 36px */
+  padding: 0 16px; /* Увеличено */
   background: linear-gradient(135deg, #3a2508, #6a4010, #3a2508);
   border: 1.5px solid var(--border-gold);
   border-radius: 7px;
   color: var(--gold-glow);
   font-family: var(--font-body);
-  font-size: 11px;
+  font-size: 13px; /* Увеличено с 11px */
   font-weight: 700;
   letter-spacing: 1px;
   cursor: pointer;
@@ -412,14 +413,14 @@
 
 .iz-quick {
   display: flex;
-  gap: 4px;
-  margin-top: 5px;
+  gap: 5px; /* Увеличено */
+  margin-top: 6px; /* Увеличено */
   flex-wrap: wrap;
 }
 
 .qb-item {
-  font-size: 9px;
-  padding: 3px 7px;
+  font-size: 11px; /* Увеличено с 9px */
+  padding: 4px 8px; /* Увеличено */
   border-radius: 4px;
   background: #1a1208;
   border: .5px solid var(--border-rust);
@@ -448,23 +449,23 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
+  gap: 3px; /* Увеличено */
   pointer-events: none;
 }
 
 .wo-text {
   font-family: var(--font-display);
-  font-size: 12px;
+  font-size: 14px; /* Увеличено с 12px */
   font-weight: 700;
   color: var(--amber);
   background: rgba(14,10,6,.85);
-  padding: 4px 10px;
+  padding: 5px 12px; /* Увеличено */
   border-radius: 6px;
   border: .5px solid var(--amber);
 }
 
 .wo-sub {
-  font-size: 10px;
+  font-size: 12px; /* Увеличено с 10px */
   color: var(--text-dim);
   font-family: var(--font-serif);
   font-style: italic;
@@ -483,21 +484,21 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 10px; /* Увеличено */
 }
 
 .fa-toilet {
-  font-size: 72px;
+  font-size: 80px; /* Увеличено с 72px */
   animation: toiletShake .15s ease-in-out infinite;
 }
 
 @keyframes toiletShake {
   0%, 100% { transform: rotate(-3deg); }
-  50%       { transform: rotate(3deg); }
+  50%        { transform: rotate(3deg); }
 }
 
 .fa-swirl {
-  font-size: 48px;
+  font-size: 56px; /* Увеличено с 48px */
   animation: swirlSpin .6s linear infinite;
 }
 
@@ -507,7 +508,7 @@
 }
 
 .fa-result {
-  font-size: 64px;
+  font-size: 72px; /* Увеличено с 64px */
   animation: resultPop .4s cubic-bezier(.3,1.6,.5,1) both;
 }
 
@@ -518,9 +519,9 @@
 
 .fa-caption {
   font-family: var(--font-display);
-  font-size: 20px;
+  font-size: 24px; /* Увеличено с 20px */
   font-weight: 900;
-  margin-top: 6px;
+  margin-top: 8px; /* Увеличено */
 }
 
 .fa-caption.win  { color: var(--gold-glow); text-shadow: 0 0 20px rgba(240,180,0,.6); }
@@ -528,7 +529,7 @@
 
 .fa-prize {
   font-family: var(--font-display);
-  font-size: 28px;
+  font-size: 32px; /* Увеличено с 28px */
   font-weight: 900;
   color: #4ade80;
   text-shadow: 0 0 14px rgba(80,220,80,.4);
@@ -542,7 +543,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
+  padding: 24px; /* Увеличено */
 }
 
 .rs-wrap {
@@ -551,17 +552,17 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 10px; /* Увеличено */
 }
 
 .rs-icon {
-  font-size: 56px;
+  font-size: 64px; /* Увеличено с 56px */
   animation: logoPulse 2s ease-in-out infinite;
 }
 
 .rs-title {
   font-family: var(--font-display);
-  font-size: 18px;
+  font-size: 22px; /* Увеличено с 18px */
   font-weight: 900;
   color: var(--gold-glow);
   text-align: center;
@@ -569,7 +570,7 @@
 
 .rs-amount {
   font-family: var(--font-display);
-  font-size: 32px;
+  font-size: 36px; /* Увеличено с 32px */
   font-weight: 900;
   color: #4ade80;
   text-shadow: 0 0 16px rgba(80,220,80,.4);
@@ -585,8 +586,8 @@
 .rs-row {
   display: flex;
   justify-content: space-between;
-  padding: 6px 10px;
-  font-size: 11px;
+  padding: 8px 12px; /* Увеличено */
+  font-size: 13px; /* Увеличено с 11px */
   font-family: var(--font-body);
   border-bottom: .5px solid var(--border-rust);
 }
@@ -600,12 +601,12 @@
 .rs-row.me .rn { color: var(--gold-glow); font-weight: 600; }
 
 .rs-ticket {
-  font-size: 11px;
+  font-size: 13px; /* Увеличено с 11px */
   color: var(--text-rust);
   background: var(--bg-card);
   border: .5px solid var(--border-rust);
   border-radius: 6px;
-  padding: 6px 12px;
+  padding: 8px 14px; /* Увеличено */
   font-family: var(--font-body);
   text-align: center;
   width: 100%;
@@ -613,18 +614,18 @@
 
 .rs-btn {
   width: 100%;
-  padding: 12px;
+  padding: 14px; /* Увеличено */
   background: linear-gradient(135deg, #3a2508, #5a3a10);
   border: 1.5px solid var(--border-gold);
   border-radius: 8px;
   color: var(--gold-glow);
   font-family: var(--font-body);
-  font-size: 13px;
+  font-size: 15px; /* Увеличено с 13px */
   font-weight: 700;
   letter-spacing: 1px;
   cursor: pointer;
   transition: all .15s;
-  margin-top: 4px;
+  margin-top: 6px; /* Увеличено */
 }
 
 .rs-btn:hover {
