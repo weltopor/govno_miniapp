@@ -58,6 +58,9 @@ function joinLobby(btn, nominal) {
 
   showToast(`✅ Вошёл в заявку на ${nominal} GOVNO!`);
 
+  // Переходим на экран игры через 1.5 сек
+  setTimeout(() => { window.location.href = `game.html?nominal=${nominal}`; }, 1500);
+
   // Лёгкая вибрация (если поддерживается)
   if (tg?.HapticFeedback) {
     tg.HapticFeedback.impactOccurred('medium');

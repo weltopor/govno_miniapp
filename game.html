@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>GOVNO — Игра</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Cinzel:wght@400;600;700&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css"/>
+  <link rel="stylesheet" href="css/game.css"/>
+</head>
+<body class="game-body">
+
+  <!-- ░░ ЭКРАН ЗАГРУЗКИ ИГРЫ ░░ -->
+  <div class="game-loader" id="gameLoader">
+    <div class="loader-icon">💩</div>
+    <div class="loader-title">Игра #1107</div>
+    <div class="loader-sub">Собираем игроков...</div>
+    <div class="loader-players" id="loaderPlayers"></div>
+    <div class="loader-bar"><div class="loader-fill" id="loaderFill"></div></div>
+    <div class="loader-status" id="loaderStatus">Ожидаем 10 игроков</div>
+  </div>
+
+  <!-- ░░ ОСНОВНОЙ ЭКРАН ИГРЫ ░░ -->
+  <div class="game-screen hidden" id="gameScreen">
+
+    <!-- Шапка -->
+    <header class="game-header">
+      <div class="gh-left">
+        <span class="gh-num">Игра #1107</span>
+        <span class="gh-players" id="playerCount">10 игроков</span>
+      </div>
+      <div class="gh-bank">
+        <span class="gh-bank-lbl">Банк</span>
+        <span class="gh-bank-val" id="bankVal">19.50</span>
+        <span class="gh-bank-cur">GOVNO</span>
+      </div>
+    </header>
+
+    <!-- Полоса хода -->
+    <div class="turn-strip" id="turnStrip">
+      <div class="ts-left">
+        <span class="ts-label">Ход:</span>
+        <span class="ts-player" id="curPlayer">@you</span>
+        <span class="ts-attempt" id="curAttempt">Попытка 1/2</span>
+      </div>
+      <div class="ts-timer" id="turnTimer">30</div>
+    </div>
+
+    <!-- Сетка унитазов -->
+    <div class="toilets-wrap">
+      <div class="toilet-grid" id="toiletGrid"></div>
+    </div>
+
+    <!-- Очередь игроков -->
+    <div class="queue-bar">
+      <div class="queue-label">Очерёдность</div>
+      <div class="queue-list" id="queueList"></div>
+    </div>
+
+    <!-- Зона ввода -->
+    <div class="input-zone" id="inputZone">
+      <div class="iz-hint" id="izHint">Введи номер или нажми на унитаз</div>
+      <div class="iz-row">
+        <button class="iz-minus" onclick="changeInput(-1)">−</button>
+        <input class="iz-input" id="toiletInput" type="number"
+               min="1" placeholder="№"
+               oninput="onInputChange(this.value)"
+               onkeydown="if(event.key==='Enter') doFlush()"/>
+        <button class="iz-plus" onclick="changeInput(1)">+</button>
+        <button class="iz-flush" id="flushBtn" onclick="doFlush()" disabled>
+          🚽 СМЫТЬ
+        </button>
+      </div>
+      <div class="iz-quick" id="quickBtns"></div>
+    </div>
+
+    <!-- Заблокированный оверлей (не твой ход) -->
+    <div class="wait-overlay hidden" id="waitOverlay">
+      <div class="wo-text">Ждём <span id="woPlayer">@kate</span></div>
+      <div class="wo-sub">Не твой ход...</div>
+    </div>
+
+  </div>
+
+  <!-- ░░ АНИМАЦИЯ СМЫВА ░░ -->
+  <div class="flush-anim hidden" id="flushAnim">
+    <div class="fa-inner">
+      <div class="fa-toilet" id="faToilet">🚽</div>
+      <div class="fa-swirl" id="faSwirl">🌀</div>
+      <div class="fa-result hidden" id="faResult"></div>
+    </div>
+  </div>
+
+  <!-- ░░ ЭКРАН ИТОГОВ ░░ -->
+  <div class="results-screen hidden" id="resultsScreen">
+    <div class="rs-wrap">
+      <div class="rs-icon" id="rsIcon">💩</div>
+      <div class="rs-title" id="rsTitle">Ты нашёл приз!</div>
+      <div class="rs-amount" id="rsAmount">+3.21 GOVNO</div>
+      <div class="rs-table" id="rsTable"></div>
+      <div class="rs-ticket">🧻 +1 билет получен автоматически</div>
+      <button class="rs-btn" onclick="goHome()">← На главную</button>
+    </div>
+  </div>
+
+  <script src="js/game.js"></script>
+</body>
+</html>
