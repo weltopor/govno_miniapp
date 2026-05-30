@@ -51,11 +51,11 @@ function getGridCols(p) {
   return 5;
 }
 function getEmojiSize(p) {
-  if (p <= 4)  return '30px';
-  if (p <= 7)  return '24px';
-  if (p <= 10) return '20px';
-  if (p <= 13) return '16px';
-  return '14px';
+  if (p <= 4)  return '60px';
+  if (p <= 7)  return '50px';
+  if (p <= 10) return '42px';
+  if (p <= 13) return '34px';
+  return '28px';
 }
 function getNumSize(p) {
   if (p <= 7)  return '10px';
@@ -275,7 +275,7 @@ function showFlushAnim(num, isWin, cb) {
   // 4. Фаза: результат через 1000мс
   showFlushAnim._timers.push(setTimeout(() => {
     swirl.style.display   = 'none';
-    toilet.textContent    = isWin ? '💩' : '🪰';
+    toilet.style.display = 'none';
     toilet.style.animation = 'none';
 
     if (isWin) {
@@ -308,6 +308,7 @@ function showFlushAnim(num, isWin, cb) {
     inner.querySelectorAll('.fa-caption,.fa-prize,.fa-pobeda').forEach(e => e.remove());
     result.classList.add('hidden');
     toilet.textContent = '🚽';
+    toilet.style.display = '';
     anim.classList.add('hidden');
     showFlushAnim._timers = [];
     cb();
