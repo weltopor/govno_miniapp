@@ -247,20 +247,21 @@ body::before {
 
 .bank-label {
   font-family: var(--font-body);
-  font-size: 8px;
-  font-weight: 600;
-  letter-spacing: 1px;
-  color: var(--text-dim);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: #c8a050;
   margin-bottom: 4px;
+  text-shadow: 0 1px 4px rgba(0,0,0,.8);
 }
 
 .bank-amount {
   font-family: var(--font-display);
-  font-size: 17px;
+  font-size: 22px;
   font-weight: 900;
-  color: var(--gold-glow);
+  color: #ffe060;
   line-height: 1;
-  text-shadow: 0 0 12px rgba(240,180,0,.4);
+  text-shadow: 0 0 16px rgba(255,210,0,.6), 0 1px 3px rgba(0,0,0,.9);
   animation: amountGlow 3s ease-in-out infinite;
 }
 
@@ -275,20 +276,23 @@ body::before {
 }
 
 .bank-currency {
-  font-size: 9px;
-  color: var(--gold-dim);
+  font-size: 11px;
+  color: #b89040;
   font-family: var(--font-body);
   margin-bottom: 5px;
+  font-weight: 600;
 }
 
 .bank-monthly .bank-currency { color: #2a6a30; }
 
 .bank-timer {
-  font-size: 9px;
-  color: var(--text-rust);
+  font-size: 11px;
+  color: #e8a060;
   font-family: var(--font-serif);
   font-style: italic;
   margin-bottom: 4px;
+  font-weight: 600;
+  text-shadow: 0 1px 3px rgba(0,0,0,.8);
 }
 
 .bank-entry {
@@ -403,10 +407,11 @@ body::before {
 
 .lobby-nominal {
   font-family: var(--font-display);
-  font-size: 16px;
+  font-size: 19px;
   font-weight: 900;
-  color: var(--gold-glow);
+  color: #ffe060;
   line-height: 1;
+  text-shadow: 0 0 10px rgba(255,200,0,.5), 0 1px 3px rgba(0,0,0,.9);
 }
 
 .lobby-cur {
@@ -430,9 +435,11 @@ body::before {
 }
 
 .lobby-timer-txt {
-  font-size: 10px;
-  color: var(--text-rust);
+  font-size: 12px;
+  color: #e09050;
   font-family: var(--font-serif);
+  font-style: normal;
+  font-weight: 600;
   font-style: italic;
 }
 

@@ -229,6 +229,12 @@ function applyOpenedCell(num, isWin) {
 
 // ── АНИМАЦИЯ СМЫВА — ПОЛНЫЙ СБРОС ──
 function showFlushAnim(num, isWin, cb) {
+  
+  if (showFlushAnim._timers) {
+    showFlushAnim._timers.forEach(clearTimeout);
+  }
+  showFlushAnim._timers = [];
+  
   const anim   = document.getElementById('flushAnim');
   const inner  = anim.querySelector('.fa-inner');
   const toilet = document.getElementById('faToilet');
