@@ -72,8 +72,8 @@ function buildGrid() {
     cell.className = 't-cell';
     cell.id = `cell-${i}`;
     cell.innerHTML = `
-      <span class="t-emoji" style="font-size:${getEmojiSize(GAME.players)}">🚽</span>
-      <span class="t-num"   style="font-size:${getNumSize(GAME.players)}">№${i}</span>`;
+      <img class="t-emoji t-img" src="img/taz.png" style="width:${getEmojiSize(GAME.players)};height:${getEmojiSize(GAME.players)}">
+      <span class="t-num" style="font-size:${getNumSize(GAME.players)}">№${i}</span>`;
     cell.addEventListener('click', () => selectCell(i));
     grid.appendChild(cell);
   }
@@ -145,6 +145,7 @@ function selectCell(num) {
   if (state.chosen) document.getElementById(`cell-${state.chosen}`)?.classList.remove('chosen');
 
   state.chosen = num;
+  document.getElementById('inputZone').classList.add('has-selection');
   cell.classList.add('chosen');
 
   const inp = document.getElementById('toiletInput');
@@ -168,6 +169,7 @@ function changeInput(delta) {
 function clearChosen() {
   if (state.chosen) document.getElementById(`cell-${state.chosen}`)?.classList.remove('chosen');
   state.chosen = null;
+  document.getElementById('inputZone').classList.remove('has-selection');
   document.getElementById('flushBtn').disabled = true;
   document.getElementById('toiletInput').classList.remove('has-val');
 }
@@ -232,7 +234,9 @@ function openBall(num, isMe) {
 function applyOpenedCell(num, isWin) {
   const cell = document.getElementById(`cell-${num}`);
   if (!cell) return;
-  cell.querySelector('.t-emoji').textContent = isWin ? '💩' : '🪰';
+  const img = cell.querySelector('.t-img');
+  img.src = isWin ? 'img/govno.png' : 'img/taz.png';
+  img.style.opacity = isWin ? '1' : '0.25';
   cell.classList.remove('mine','chosen','dim');
   cell.classList.add(isWin ? 'won' : 'lost');
 }
@@ -252,7 +256,7 @@ function showFlushAnim(num, isWin, cb) {
   const result = document.getElementById('faResult');
 
   // 1. Полностью чистим предыдущее состояние ДО показа
-  inner.querySelectorAll('.fa-caption,.fa-prize').forEach(e => e.remove());
+  inner.querySelectorAll('.fa-caption,.fa-prize,.fa-pobeda').forEach(e => e.remove());
   toilet.textContent      = '🚽';
   toilet.style.animation  = 'toiletShake .15s ease-in-out infinite';
   swirl.style.display     = 'none';
@@ -274,6 +278,12 @@ function showFlushAnim(num, isWin, cb) {
     toilet.textContent    = isWin ? '💩' : '🪰';
     toilet.style.animation = 'none';
 
+    if (isWin) {
+      const pobImg = document.createElement('img');
+      pobImg.src = 'img/pobeda.png';
+      pobImg.className = 'fa-pobeda';
+      inner.appendChild(pobImg);
+    }
     const cap = document.createElement('div');
     cap.className   = `fa-caption ${isWin ? 'win' : 'lose'}`;
     cap.textContent = isWin ? '💰 Выигрыш!' : '🪰 Пусто...';
@@ -461,9 +471,9 @@ function startGame() {
   document.getElementById('playerCount').textContent = `${GAME.players} игроков`;
   document.getElementById('bankVal').textContent     = PRIZE_POOL;
   document.getElementById('toiletInput').max         = TOTAL_BALLS;
-  buildGrid();
-  buildQueue();
-  updateTurnUI();
+  bubuildGrid();
+buildQueue();
+showAttemptBanner(1, () => updateTurnUI());
 }
 
 document.addEventListener('DOMContentLoaded', runLoader);
