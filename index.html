@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>GOVNO ne TONet</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Cinzel:wght@400;600;700&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+
+  <!-- ░░ ФОНОВЫЕ ЧАСТИЦЫ ░░ -->
+  <div class="bg-layer">
+    <div class="fly" id="fly1">🪰</div>
+    <div class="fly" id="fly2">🪰</div>
+    <div class="fly" id="fly3">🪰</div>
+    <div class="steam" id="s1"></div>
+    <div class="steam" id="s2"></div>
+    <div class="steam" id="s3"></div>
+  </div>
+
+  <!-- ░░ ШАПКА ░░ -->
+  <header class="app-header">
+    <div class="logo-wrap">
+      <span class="logo-icon">💩</span>
+      <div class="logo-text">
+        <span class="logo-top">$GOVNO</span>
+        <span class="logo-bot">ne <span class="logo-ton">⚙ TON</span> et</span>
+      </div>
+    </div>
+    <div class="wallet-badge" id="walletBadge">
+      <span class="wallet-dot"></span>
+      <span id="walletShort">Подключить</span>
+    </div>
+  </header>
+
+  <!-- ░░ ОСНОВНОЙ КОНТЕНТ ░░ -->
+  <main class="app-main" id="screenHome">
+
+    <!-- Банки -->
+    <section class="banks-row">
+
+      <div class="bank-card bank-weekly">
+        <div class="bank-gear">⚙</div>
+        <div class="bank-content">
+          <div class="bank-label">💀 НЕДЕЛЬНЫЙ БАНК</div>
+          <div class="bank-amount" id="weeklyAmount">1 284.50</div>
+          <div class="bank-currency">GOVNO</div>
+          <div class="bank-timer" id="weeklyTimer">⏳ через 4д 12ч</div>
+          <div class="bank-entry">🧻 10 билетов — вход</div>
+        </div>
+        <div class="bank-pipe bank-pipe-right"></div>
+      </div>
+
+      <div class="bank-card bank-monthly">
+        <div class="bank-gear">⚙</div>
+        <div class="bank-content">
+          <div class="bank-label">👑 МЕСЯЧНЫЙ БАНК</div>
+          <div class="bank-amount" id="monthlyAmount">8 742.00</div>
+          <div class="bank-currency">GOVNO</div>
+          <div class="bank-timer" id="monthlyTimer">⏳ 1 июня 00:00</div>
+          <div class="bank-entry">🧻 20 билетов — вход</div>
+        </div>
+        <div class="bank-pipe bank-pipe-left"></div>
+      </div>
+
+    </section>
+
+    <!-- Заявки -->
+    <section class="lobbies-section">
+      <div class="section-title">
+        <span class="title-line"></span>
+        <span class="title-text">⚙ АКТИВНЫЕ ЗАЯВКИ ⚙</span>
+        <span class="title-line"></span>
+      </div>
+
+      <div class="lobby-card" data-nominal="0.5">
+        <div class="lobby-left">
+          <div class="lobby-toilet">🚽</div>
+          <div class="lobby-info">
+            <div class="lobby-nominal">0.5 <span class="lobby-cur">GOVNO</span></div>
+            <div class="lobby-timer-row">
+              <span class="lobby-timer-dot"></span>
+              <span class="lobby-timer-txt">Старт через 06:23</span>
+            </div>
+          </div>
+        </div>
+        <div class="lobby-right">
+          <div class="lobby-slots">
+            <span class="slots-filled">7</span><span class="slots-sep">/</span><span class="slots-max">10</span>
+            <span class="slots-label">мест</span>
+          </div>
+          <div class="slots-bar"><div class="slots-fill" style="width:70%"></div></div>
+          <button class="join-btn" onclick="joinLobby(this, 0.5)">
+            <span class="btn-icon">🚽</span> ВОЙТИ
+          </button>
+        </div>
+      </div>
+
+      <div class="lobby-card" data-nominal="1">
+        <div class="lobby-left">
+          <div class="lobby-toilet">🚽</div>
+          <div class="lobby-info">
+            <div class="lobby-nominal">1 <span class="lobby-cur">GOVNO</span></div>
+            <div class="lobby-timer-row">
+              <span class="lobby-timer-dot"></span>
+              <span class="lobby-timer-txt">Старт через 06:23</span>
+            </div>
+          </div>
+        </div>
+        <div class="lobby-right">
+          <div class="lobby-slots">
+            <span class="slots-filled">3</span><span class="slots-sep">/</span><span class="slots-max">10</span>
+            <span class="slots-label">мест</span>
+          </div>
+          <div class="slots-bar"><div class="slots-fill" style="width:30%"></div></div>
+          <button class="join-btn" onclick="joinLobby(this, 1)">
+            <span class="btn-icon">🚽</span> ВОЙТИ
+          </button>
+        </div>
+      </div>
+
+      <div class="lobby-card" data-nominal="2">
+        <div class="lobby-left">
+          <div class="lobby-toilet">🚽</div>
+          <div class="lobby-info">
+            <div class="lobby-nominal">2 <span class="lobby-cur">GOVNO</span></div>
+            <div class="lobby-timer-row">
+              <span class="lobby-timer-dot"></span>
+              <span class="lobby-timer-txt">Старт через 06:23</span>
+            </div>
+          </div>
+        </div>
+        <div class="lobby-right">
+          <div class="lobby-slots">
+            <span class="slots-filled">1</span><span class="slots-sep">/</span><span class="slots-max">10</span>
+            <span class="slots-label">мест</span>
+          </div>
+          <div class="slots-bar"><div class="slots-fill" style="width:10%"></div></div>
+          <button class="join-btn" onclick="joinLobby(this, 2)">
+            <span class="btn-icon">🚽</span> ВОЙТИ
+          </button>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- ░░ НИЖНЯЯ НАВИГАЦИЯ ░░ -->
+  <nav class="bottom-nav">
+    <button class="nav-btn active" onclick="switchTab(this,'home')">
+      <span class="nav-icon">🏠</span>
+      <span class="nav-label">Главная</span>
+    </button>
+    <button class="nav-btn" onclick="switchTab(this,'history')">
+      <span class="nav-icon">📜</span>
+      <span class="nav-label">Мои игры</span>
+    </button>
+    <button class="nav-btn" onclick="switchTab(this,'rating')">
+      <span class="nav-icon">🏆</span>
+      <span class="nav-label">Рейтинг</span>
+    </button>
+    <button class="nav-btn" onclick="switchTab(this,'profile')">
+      <span class="nav-icon">💀</span>
+      <span class="nav-label">Профиль</span>
+    </button>
+  </nav>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
