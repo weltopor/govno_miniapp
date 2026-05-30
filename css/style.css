@@ -4,28 +4,28 @@
 ═══════════════════════════════════════════ */
 
 :root {
-  --bg-deep:      #0e0a06;
-  --bg-dark:      #16100a;
-  --bg-card:      #1e1508;
-  --bg-card2:      #241b0c;
-  --border-gold:  #7a5c1e;
-  --border-rust:  #5a3a1a;
-  --gold-bright:  #d4a017;
-  --gold-dim:      #8a6010;
-  --gold-glow:    #f0c040;
+  --bg-deep:      #1a1408;
+  --bg-dark:      #221a0c;
+  --bg-card:      #2a2010;
+  --bg-card2:     #302618;
+  --border-gold:  #8a6c28;
+  --border-rust:  #6a4820;
+  --gold-bright:  #e8c040;
+  --gold-dim:     #9a7828;
+  --gold-glow:    #f5d050;
   --amber:        #c87820;
-  --rust:          #8b4513;
+  --rust:         #8b4513;
   --green-dim:    #1a3010;
-  --green-glow:    #2a6020;
-  --text-gold:    #e8c060;
-  --text-dim:      #7a6040;
-  --text-rust:    #c07040;
+  --green-glow:   #2a6020;
+  --text-gold:    #f0d070;
+  --text-dim:     #8a7050;
+  --text-rust:    #d08858;
   --red-dim:      #3a0a0a;
-  --pipe-color:    #3a2a10;
+  --pipe-color:   #3a2a10;
 
   --font-display: 'Cinzel Decorative', serif;
   --font-body:    'Cinzel', serif;
-  --font-serif:    'IM Fell English', serif;
+  --font-serif:   'IM Fell English', serif;
 
   --nav-h: 60px;
   --header-h: 62px;
@@ -119,7 +119,7 @@ body::before {
 
 @keyframes logoPulse {
   0%, 100% { filter: drop-shadow(0 0 6px rgba(200,120,0,.6)); }
-  50%        { filter: drop-shadow(0 0 14px rgba(240,180,0,.9)); }
+  50%       { filter: drop-shadow(0 0 14px rgba(240,180,0,.9)); }
 }
 
 .logo-text {
@@ -180,7 +180,7 @@ body::before {
 
 @keyframes dotBlink {
   0%, 100% { opacity: 1; }
-  50%        { opacity: .3; }
+  50%       { opacity: .3; }
 }
 
 /* ── ОСНОВНОЙ СКРОЛЛ ── */
@@ -242,21 +242,21 @@ body::before {
 
 @keyframes gearSpin {
   from { transform: rotate(0deg); }
-  to    { transform: rotate(360deg); }
+  to   { transform: rotate(360deg); }
 }
 
 .bank-label {
   font-family: var(--font-body);
-  font-size: 12px; /* Увеличено с 8px */
+  font-size: 8px;
   font-weight: 600;
   letter-spacing: 1px;
   color: var(--text-dim);
-  margin-bottom: 6px; /* Увеличено */
+  margin-bottom: 4px;
 }
 
 .bank-amount {
   font-family: var(--font-display);
-  font-size: 24px; /* Увеличено с 17px */
+  font-size: 17px;
   font-weight: 900;
   color: var(--gold-glow);
   line-height: 1;
@@ -271,34 +271,34 @@ body::before {
 
 @keyframes amountGlow {
   0%, 100% { text-shadow: 0 0 8px rgba(240,180,0,.3); }
-  50%        { text-shadow: 0 0 18px rgba(240,180,0,.7); }
+  50%       { text-shadow: 0 0 18px rgba(240,180,0,.7); }
 }
 
 .bank-currency {
-  font-size: 11px; /* Увеличено с 9px */
+  font-size: 9px;
   color: var(--gold-dim);
   font-family: var(--font-body);
-  margin-bottom: 8px; /* Увеличено */
+  margin-bottom: 5px;
 }
 
 .bank-monthly .bank-currency { color: #2a6a30; }
 
 .bank-timer {
-  font-size: 11px; /* Увеличено с 9px */
+  font-size: 9px;
   color: var(--text-rust);
   font-family: var(--font-serif);
   font-style: italic;
-  margin-bottom: 6px; /* Увеличено */
+  margin-bottom: 4px;
 }
 
 .bank-entry {
-  font-size: 10px; /* Увеличено с 8px */
+  font-size: 8px;
   color: var(--text-dim);
   font-family: var(--font-body);
   background: rgba(0,0,0,.3);
   border: .5px solid var(--border-rust);
   border-radius: 4px;
-  padding: 3px 6px; /* Увеличено */
+  padding: 2px 5px;
   display: inline-block;
 }
 
@@ -329,7 +329,7 @@ body::before {
 
 .title-text {
   font-family: var(--font-body);
-  font-size: 11px; /* Увеличено с 9px */
+  font-size: 9px;
   font-weight: 700;
   letter-spacing: 2px;
   color: var(--gold-dim);
@@ -346,7 +346,7 @@ body::before {
   background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-card2) 100%);
   border: 1.5px solid var(--border-rust);
   border-radius: 10px;
-  padding: 12px 14px; /* Увеличено */
+  padding: 10px 12px;
   position: relative;
   overflow: hidden;
   transition: border-color .2s, box-shadow .2s;
@@ -386,11 +386,11 @@ body::before {
 .lobby-left {
   display: flex;
   align-items: center;
-  gap: 12px; /* Увеличено */
+  gap: 10px;
 }
 
 .lobby-toilet {
-  font-size: 32px; /* Увеличено с 28px */
+  font-size: 28px;
   filter: drop-shadow(0 0 4px rgba(180,120,0,.4));
   transition: transform .2s;
 }
@@ -399,18 +399,18 @@ body::before {
   transform: rotate(-10deg) scale(1.1);
 }
 
-.lobby-info { display: flex; flex-direction: column; gap: 4px; /* Увеличено */ }
+.lobby-info { display: flex; flex-direction: column; gap: 3px; }
 
 .lobby-nominal {
   font-family: var(--font-display);
-  font-size: 20px; /* Увеличено с 16px */
+  font-size: 16px;
   font-weight: 900;
   color: var(--gold-glow);
   line-height: 1;
 }
 
 .lobby-cur {
-  font-size: 11px; /* Увеличено с 9px */
+  font-size: 9px;
   font-weight: 400;
   color: var(--gold-dim);
   font-family: var(--font-body);
@@ -419,18 +419,18 @@ body::before {
 .lobby-timer-row {
   display: flex;
   align-items: center;
-  gap: 6px; /* Увеличено */
+  gap: 4px;
 }
 
 .lobby-timer-dot {
-  width: 6px; height: 6px; /* Увеличено с 5px */
+  width: 5px; height: 5px;
   border-radius: 50%;
   background: var(--amber);
   animation: dotBlink 1.5s ease-in-out infinite;
 }
 
 .lobby-timer-txt {
-  font-size: 12px; /* Увеличено с 10px */
+  font-size: 10px;
   color: var(--text-rust);
   font-family: var(--font-serif);
   font-style: italic;
@@ -440,30 +440,30 @@ body::before {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 6px; /* Увеличено */
+  gap: 4px;
 }
 
 .lobby-slots {
   font-family: var(--font-body);
-  font-size: 13px; /* Увеличено с 11px */
+  font-size: 11px;
   color: var(--text-dim);
 }
 
 .slots-filled {
-  font-size: 16px; /* Увеличено с 14px */
+  font-size: 14px;
   font-weight: 700;
   color: var(--amber);
 }
 
 .slots-sep { color: var(--text-dim); margin: 0 1px; }
 .slots-max { color: var(--text-dim); }
-.slots-label { font-size: 11px; /* Увеличено с 9px */ color: var(--text-dim); margin-left: 3px; }
+.slots-label { font-size: 9px; color: var(--text-dim); margin-left: 3px; }
 
 .slots-bar {
-  width: 90px; /* Увеличено с 80px */
-  height: 6px; /* Увеличено с 4px */
+  width: 80px;
+  height: 4px;
   background: rgba(0,0,0,.4);
-  border-radius: 3px; /* Увеличено */
+  border-radius: 2px;
   border: .5px solid var(--border-rust);
   overflow: hidden;
 }
@@ -471,7 +471,7 @@ body::before {
 .slots-fill {
   height: 100%;
   background: linear-gradient(90deg, var(--rust), var(--amber));
-  border-radius: 3px; /* Увеличено */
+  border-radius: 2px;
   transition: width .5s ease;
 }
 
@@ -479,15 +479,15 @@ body::before {
 .join-btn {
   display: flex;
   align-items: center;
-  gap: 6px; /* Увеличено */
+  gap: 4px;
   background: linear-gradient(135deg, #3a2508 0%, #6a4010 50%, #3a2508 100%);
   border: 1.5px solid var(--border-gold);
   color: var(--gold-glow);
   font-family: var(--font-body);
-  font-size: 12px; /* Увеличено с 10px */
+  font-size: 10px;
   font-weight: 700;
   letter-spacing: 1.5px;
-  padding: 8px 16px; /* Увеличено */
+  padding: 6px 12px;
   border-radius: 6px;
   cursor: pointer;
   position: relative;
@@ -523,7 +523,7 @@ body::before {
   color: #4ade80;
 }
 
-.btn-icon { font-size: 14px; /* Увеличено с 12px */ }
+.btn-icon { font-size: 12px; }
 
 /* ── НИЖНЯЯ НАВИГАЦИЯ ── */
 .bottom-nav {
@@ -543,11 +543,11 @@ body::before {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 4px; /* Увеличено */
+  gap: 2px;
   background: none;
   border: none;
   cursor: pointer;
-  padding: 6px 0; /* Увеличено */
+  padding: 4px 0;
   position: relative;
   transition: all .15s;
 }
@@ -556,16 +556,16 @@ body::before {
   content: '';
   position: absolute;
   top: 0; left: 50%; transform: translateX(-50%);
-  width: 0; height: 3px; /* Увеличено */
+  width: 0; height: 2px;
   background: var(--gold-bright);
   border-radius: 0 0 2px 2px;
   transition: width .2s;
 }
 
-.nav-btn.active::after { width: 50px; /* Увеличено */ }
+.nav-btn.active::after { width: 40px; }
 
 .nav-icon {
-  font-size: 22px; /* Увеличено с 18px */
+  font-size: 18px;
   filter: grayscale(.8) brightness(.6);
   transition: filter .15s, transform .15s;
 }
@@ -578,7 +578,7 @@ body::before {
 
 .nav-label {
   font-family: var(--font-body);
-  font-size: 11px; /* Увеличено с 8px */
+  font-size: 8px;
   letter-spacing: .5px;
   color: var(--text-dim);
   transition: color .15s;
@@ -591,13 +591,13 @@ body::before {
 .lobby-card::after {
   content: '⬡';
   position: absolute;
-  font-size: 10px; /* Увеличено с 8px */
+  font-size: 8px;
   color: var(--border-gold);
   opacity: .3;
 }
 
-.bank-card::after { top: 6px; left: 8px; /* Увеличено */ }
-.lobby-card::after { bottom: 6px; left: 10px; /* Увеличено */ }
+.bank-card::after { top: 5px; left: 6px; }
+.lobby-card::after { bottom: 5px; left: 8px; }
 
 /* ── TOAST-УВЕДОМЛЕНИЕ ── */
 .toast {
@@ -607,9 +607,9 @@ body::before {
   background: linear-gradient(135deg, #2a1a04, #3a2a08);
   border: 1px solid var(--border-gold);
   border-radius: 8px;
-  padding: 10px 20px; /* Увеличено */
+  padding: 8px 16px;
   font-family: var(--font-body);
-  font-size: 13px; /* Увеличено с 11px */
+  font-size: 11px;
   color: var(--gold-glow);
   z-index: 200;
   opacity: 0;
