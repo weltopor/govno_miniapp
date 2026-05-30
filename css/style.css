@@ -577,6 +577,20 @@ body::before {
   transition: filter .15s, transform .15s;
 }
 
+.nav-icon-img {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+  filter: brightness(.45) saturate(.3);
+  transition: filter .2s, transform .15s;
+}
+
+.nav-btn.active .nav-icon-img,
+.nav-btn:hover .nav-icon-img {
+  filter: brightness(1) saturate(1) drop-shadow(0 0 6px rgba(220,160,0,.5));
+  transform: scale(1.1);
+}
+
 .nav-btn.active .nav-icon,
 .nav-btn:hover .nav-icon {
   filter: grayscale(0) brightness(1);
