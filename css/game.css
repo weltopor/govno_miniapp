@@ -642,6 +642,7 @@
   background: radial-gradient(ellipse at center, rgba(42,26,4,.75) 0%, rgba(14,10,2,.75) 70%);
   display: flex; align-items: center; justify-content: center;
   backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
 }
 
 .win-screen::before {

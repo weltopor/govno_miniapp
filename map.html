@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>Карта Сортиров</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Cinzel:wght@400;600;700&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css"/>
+  <link rel="stylesheet" href="css/map.css"/>
+</head>
+<body class="map-body">
+
+  <header class="app-header">
+    <div class="logo-glow-bg"></div>
+    <img src="img/logo.png" class="logo-img" alt="GOVNO ne TONet">
+    <button class="map-back-btn" onclick="window.location.href='index.html'">← Назад</button>
+  </header>
+
+  <main class="map-main">
+
+    <div class="map-title-row">
+      <span class="map-title">⚙ КАРТА СОРТИРОВ ⚙</span>
+      <div class="map-progress-badge">
+        <span class="map-progress-label">ВАШ ПРОГРЕСС</span>
+        <span class="map-progress-val">35%</span>
+      </div>
+    </div>
+
+    <div class="map-canvas" id="mapCanvas">
+
+      <!-- Фоновая сеть труб -->
+      <img src="img/map/hub_network.png" class="map-hub-bg" alt="">
+
+      <!-- Тронный зал — верхний левый конец трубы -->
+      <div class="map-node" onclick="goToSection('tron')"
+           style="top:1%; left:1%; transform:translateX(-10%);">
+        <div class="map-node-img-wrap" style="width:125px;height:130px;">
+          <img src="img/map/tron.png" class="map-node-img" alt="">
+          <div class="map-node-glow gold"></div>
+        </div>
+        <div class="map-node-label vip">ТРОННЫЙ ЗАЛ</div>
+      </div>
+
+      <!-- VIP уборная — верхний правый конец трубы -->
+      <div class="map-node" onclick="goToSection('zal')"
+           style="top:4%; right:1%; transform:translateX(10%);">
+        <div class="map-node-img-wrap" style="width:120px;height:125px;">
+          <img src="img/map/zal.png" class="map-node-img" alt="">
+          <div class="map-node-glow gold"></div>
+        </div>
+        <div class="map-node-label vip">VIP УБОРНАЯ</div>
+      </div>
+
+      <!-- Ржавая кабинка — правый средний конец -->
+      <div class="map-node" onclick="goToSection('budka')"
+           style="top:60%; left:12%; transform:translateX(-50%);">
+        <div class="map-node-img-wrap" style="width:100px;height:95px;transform:rotate(3deg);">
+          <img src="img/map/budka.png" class="map-node-img" alt="">
+        </div>
+        <div class="map-node-label">РЖАВАЯ КАБИНКА</div>
+      </div>
+
+      <!-- Туалет школьника — левый средний конец -->
+      <div class="map-node" onclick="goToSection('unitaz')"
+           style="top:62%; right:15%; transform:translateX(50%);">
+        <div class="map-node-img-wrap" style="width:100px;height:95px;transform:rotate(-3deg);">
+          <img src="img/map/unitaz.png" class="map-node-img" alt="">
+        </div>
+        <div class="map-node-label">ТУАЛЕТ ШКОЛЬНИКА</div>
+      </div>
+
+      <!-- Канализационный колодец — центр -->
+      <div class="map-node" onclick="goToSection('kanal')"
+           style="top:45%; left:51%; transform:translate(-50%,-60%);"">
+        <div class="map-node-img-wrap" style="width:145px;height:150px;transform:rotate(2deg);">
+          <img src="img/map/kanal.png" class="map-node-img" alt="">
+        </div>
+        <div class="map-node-label">КАНАЛИЗАЦИОННЫЙ КОЛОДЕЦ</div>
+      </div>
+
+      <!-- Засоренный трубопровод — нижний центр -->
+      <div class="map-node" onclick="goToSection('truba')"
+           style="bottom:9%; left:47%; transform:translateX(-50%);">
+        <div class="map-node-img-wrap" style="width:105px;height:98px;transform:rotate(-2deg);">
+          <img src="img/map/truba.png" class="map-node-img" alt="">
+        </div>
+        <div class="map-node-label">ЗАСОРЕННЫЙ ТРУБОПРОВОД</div>
+      </div>
+
+    </div>
+  </main>
+
+  <script>
+    const tg = window.Telegram?.WebApp;
+    if (tg) { tg.ready(); tg.expand(); }
+
+    function goToSection(id) {
+      alert('Раздел: ' + id + ' — в разработке');
+    }
+  </script>
+</body>
+</html>

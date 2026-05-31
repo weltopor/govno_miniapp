@@ -216,3 +216,8 @@ function initFlies() {
     });
   });
 }
+
+function goToMap() {
+  playMenuClick();
+  window.location.href = 'map.html';
+}
