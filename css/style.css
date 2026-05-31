@@ -69,6 +69,8 @@ body::before {
   animation: flyAnim 12s infinite ease-in-out;
   pointer-events: auto;
   cursor: pointer;
+  user-select: none; 
+  -webkit-tap-highlight-color: transparent;
 }
 
 #fly1 { top: 15%; left: 10%;  animation-delay: 0s;   animation-duration: 11s; }
