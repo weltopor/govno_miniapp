@@ -16,6 +16,10 @@
     <div class="fly" id="fly1">🪰</div>
     <div class="fly" id="fly2">🪰</div>
     <div class="fly" id="fly3">🪰</div>
+    <div class="fly" id="fly4">🪰</div>
+    <div class="fly" id="fly5">🪰</div>
+    <div class="fly" id="fly6">🪰</div>
+    <div class="fly" id="fly7">🪰</div>
     <div class="steam" id="s1"></div>
     <div class="steam" id="s2"></div>
     <div class="steam" id="s3"></div>
@@ -23,16 +27,11 @@
 
   <!-- ░░ ШАПКА ░░ -->
   <header class="app-header">
-    <div class="logo-wrap">
-      <span class="logo-icon">💩</span>
-      <div class="logo-text">
-        <span class="logo-top">$GOVNO</span>
-        <span class="logo-bot">ne <span class="logo-ton">⚙ TON</span> et</span>
-      </div>
-    </div>
+    <div class="logo-glow-bg"></div>
+    <img src="img/logo.png" class="logo-img" alt="GOVNO ne TONet">
     <div class="wallet-badge" id="walletBadge">
       <span class="wallet-dot"></span>
-      <span id="walletShort">Подключить</span>
+      <span id="walletShort">Кошелёк</span>
     </div>
   </header>
 
@@ -74,7 +73,7 @@
         <span class="title-line"></span>
       </div>
 
-      <div class="lobby-card" data-nominal="0.5">
+      <div class="lobby-card" data-nominal="0.5" data-players="2">
         <div class="lobby-left">
           <div class="lobby-toilet">🚽</div>
           <div class="lobby-info">
@@ -87,17 +86,17 @@
         </div>
         <div class="lobby-right">
           <div class="lobby-slots">
-            <span class="slots-filled">7</span><span class="slots-sep">/</span><span class="slots-max">10</span>
+            <span class="slots-filled">1</span><span class="slots-sep">/</span><span class="slots-max">2</span>
             <span class="slots-label">мест</span>
           </div>
-          <div class="slots-bar"><div class="slots-fill" style="width:70%"></div></div>
+          <div class="slots-bar"><div class="slots-fill" style="width:50%"></div></div>
           <button class="join-btn" onclick="joinLobby(this, 0.5)">
             <span class="btn-icon">🚽</span> ВОЙТИ
           </button>
         </div>
       </div>
 
-      <div class="lobby-card" data-nominal="1">
+      <div class="lobby-card" data-nominal="1" data-players="5">
         <div class="lobby-left">
           <div class="lobby-toilet">🚽</div>
           <div class="lobby-info">
@@ -110,17 +109,17 @@
         </div>
         <div class="lobby-right">
           <div class="lobby-slots">
-            <span class="slots-filled">3</span><span class="slots-sep">/</span><span class="slots-max">10</span>
+            <span class="slots-filled">3</span><span class="slots-sep">/</span><span class="slots-max">5</span>
             <span class="slots-label">мест</span>
           </div>
-          <div class="slots-bar"><div class="slots-fill" style="width:30%"></div></div>
+          <div class="slots-bar"><div class="slots-fill" style="width:60%"></div></div>
           <button class="join-btn" onclick="joinLobby(this, 1)">
             <span class="btn-icon">🚽</span> ВОЙТИ
           </button>
         </div>
       </div>
 
-      <div class="lobby-card" data-nominal="2">
+      <div class="lobby-card" data-nominal="2" data-players="10">
         <div class="lobby-left">
           <div class="lobby-toilet">🚽</div>
           <div class="lobby-info">
@@ -162,8 +161,8 @@
       <span class="nav-label">Рейтинг</span>
     </button>
     <button class="nav-btn" onclick="switchTab(this,'profile')">
-      <img class="nav-icon-img" src="img/icons/nav-profile.png" alt="">
-      <span class="nav-label">Профиль</span>
+      <img class="nav-icon-img" src="img/icons/nav-kompas.png" alt="">
+      <span class="nav-label">Билеты</span>
     </button>
   </nav>
 

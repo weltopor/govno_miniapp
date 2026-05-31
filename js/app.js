@@ -12,6 +12,16 @@ if (tg) {
   tg.setBackgroundColor('#0e0a06');
 }
 
+// ── ЗВУК МЕНЮ ──
+const menuClick = new Audio('sounds/menu_click.ogg');
+menuClick.preload = 'auto';
+menuClick.volume = 0.6;
+
+function playMenuClick() {
+  menuClick.currentTime = 0;
+  menuClick.play().catch(() => {});
+}
+
 // ── Toast уведомление ──
 let toastEl = null;
 function showToast(msg) {
@@ -27,11 +37,13 @@ function showToast(msg) {
 
 // ── Кнопка ВОЙТИ ──
 function joinLobby(btn, nominal) {
+  playMenuClick();
   // Проверяем: кошелёк подключён?
   if (!walletConnected) {
-    showToast('⚠️ Сначала подключи кошелёк!');
-    highlightWallet();
-    return;
+    // Для тестирования — автоподключение
+    walletConnected = true;
+    document.querySelector('.wallet-dot').classList.add('connected');
+    document.getElementById('walletShort').textContent = 'TEST...wallet';
   }
 
   const card = btn.closest('.lobby-card');
@@ -59,7 +71,10 @@ function joinLobby(btn, nominal) {
   showToast(`✅ Вошёл в заявку на ${nominal} GOVNO!`);
 
   // Переходим на экран игры через 1.5 сек
-  setTimeout(() => { window.location.href = `game.html?nominal=${nominal}`; }, 1500);
+  setTimeout(() => {
+  const players = parseInt(card.dataset.players) || 10;
+  window.location.href = `game.html?nominal=${nominal}&players=${players}`;
+  }, 1500);
 
   // Лёгкая вибрация (если поддерживается)
   if (tg?.HapticFeedback) {
@@ -80,27 +95,9 @@ function highlightWallet() {
   }, 1500);
 }
 
-document.getElementById('walletBadge').addEventListener('click', () => {
-  if (walletConnected) {
-    showToast('💰 Кошелёк уже подключён');
-    return;
-  }
-  // Здесь будет TON Connect 2.0
-  // Пока — заглушка
-  showToast('🔗 Подключаем TON-кошелёк...');
-  setTimeout(() => {
-    walletConnected = true;
-    const dot = document.querySelector('.wallet-dot');
-    const short = document.getElementById('walletShort');
-    dot.classList.add('connected');
-    short.textContent = 'UQAb...f3Kp';
-    showToast('✅ Кошелёк подключён!');
-    if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-  }, 1200);
-});
-
 // ── Переключение вкладок ──
 function switchTab(btn, tab) {
+  playMenuClick();
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
 
@@ -147,6 +144,44 @@ function animateCounter(el, target, duration = 1200) {
 document.addEventListener('DOMContentLoaded', () => {
   startLobbyTimers();
 
+  document.getElementById('walletBadge').addEventListener('click', () => {
+    playMenuClick();
+    if (walletConnected) {
+      showToast('💰 Кошелёк уже подключён');
+      return;
+    }
+    // Здесь будет TON Connect 2.0
+    // Пока — заглушка
+    showToast('🔗 Подключаем TON-кошелёк...');
+    setTimeout(() => {
+      walletConnected = true;
+      const dot = document.querySelector('.wallet-dot');
+      const short = document.getElementById('walletShort');
+      dot.classList.add('connected');
+      short.textContent = 'UQAb...f3Kp';
+      showToast('✅ Кошелёк подключён!');
+      if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+    }, 1200);
+  });
+
+  // Приветственный звук
+  if (!sessionStorage.getItem('welcomePlayed')) {
+    const welcomeSound = new Audio('sounds/welcome.ogg');
+    welcomeSound.preload = 'auto';
+    welcomeSound.volume = 0.7;
+
+    const playWelcome = () => {
+      welcomeSound.play()
+        .then(() => {
+          sessionStorage.setItem('welcomePlayed', '1');
+        })
+        .catch(() => {});
+    };
+
+    document.addEventListener('click', playWelcome, { once: true });
+    document.addEventListener('touchstart', playWelcome, { once: true });
+  }
+
   // Анимируем счётчики банков при загрузке
   setTimeout(() => {
     animateCounter(document.getElementById('weeklyAmount'),  1284.50);
@@ -158,4 +193,26 @@ document.addEventListener('DOMContentLoaded', () => {
   if (user?.first_name) {
     setTimeout(() => showToast(`Добро пожаловать, ${user.first_name}! 💩`), 800);
   }
+
+  setTimeout(initFlies, 500);
 });
+
+// ── МУХИ ЖУЖЖАТ ──
+// Создаём заранее чтобы браузер не блокировал
+const buzzSound = new Audio('sounds/buzz.ogg');
+buzzSound.preload = 'auto';
+buzzSound.volume = 0.5;
+
+function initFlies() {
+  document.querySelectorAll('.fly').forEach(fly => {
+    fly.style.cursor = 'pointer';
+    fly.addEventListener('click', (e) => {
+      e.stopPropagation(); // не триггерим welcomeSound
+      const buzz = new Audio('sounds/buzz.ogg');
+      buzz.volume = 0.5;
+      buzz.play().catch(err => console.log('buzz error:', err));
+      fly.style.fontSize = '20px';
+      setTimeout(() => fly.style.fontSize = '13px', 300);
+    });
+  });
+}

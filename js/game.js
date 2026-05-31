@@ -6,12 +6,29 @@
 const tg = window.Telegram?.WebApp;
 if (tg) { tg.ready(); tg.expand(); tg.setHeaderColor('#1a1408'); tg.setBackgroundColor('#1a1408'); }
 
+// ── ЗВУКИ ──
+const SFX = {
+  click: new Audio('sounds/click.ogg'),
+  flush: new Audio('sounds/flush.ogg'),
+  win:   new Audio('sounds/win.ogg'),
+  lose:  new Audio('sounds/lose.ogg'),
+};
+Object.values(SFX).forEach(a => { a.preload = 'auto'; a.volume = 0.6; });
+
+function playSound(name) {
+  const s = SFX[name];
+  if (!s) return;
+  s.currentTime = 0;
+  s.play().catch(() => {});
+}
+
 // ── КОНФИГУРАЦИЯ ИГРЫ ──
+const params = new URLSearchParams(window.location.search);
 const GAME = {
   id:      1107,
-  nominal: 1,
-  players: 10,
-  myIndex: 3,
+  nominal: parseFloat(params.get('nominal')) || 1,
+  players: parseInt(params.get('players'))   || 10,
+  myIndex: 1,
 };
 
 const PLAYERS = ['@igor','@anna','@max','@you','@kate','@dima','@alex','@mia','@oleg','@lena'];
@@ -51,12 +68,9 @@ function getGridCols(p) {
   return 5;
 }
 function getEmojiSize(p) {
-  if (p <= 4)  return '60px';
-  if (p <= 7)  return '50px';
-  if (p <= 10) return '42px';
-  if (p <= 13) return '34px';
-  return '28px';
+  return '60%';
 }
+
 function getNumSize(p) {
   if (p <= 7)  return '10px';
   if (p <= 12) return '9px';
@@ -66,13 +80,16 @@ function getNumSize(p) {
 function buildGrid() {
   const grid = document.getElementById('toiletGrid');
   grid.style.gridTemplateColumns = `repeat(${getGridCols(GAME.players)}, 1fr)`;
+  const rows = Math.ceil(TOTAL_BALLS / getGridCols(GAME.players));
+  grid.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
+  grid.style.height = '100%';
   grid.innerHTML = '';
   for (let i = 1; i <= TOTAL_BALLS; i++) {
     const cell = document.createElement('div');
     cell.className = 't-cell';
     cell.id = `cell-${i}`;
     cell.innerHTML = `
-      <img class="t-emoji t-img" src="img/taz.png" style="width:${getEmojiSize(GAME.players)};height:${getEmojiSize(GAME.players)}">
+      <img class="t-emoji t-img" src="img/taz.png" style="width:${getEmojiSize(GAME.players)};height:auto">
       <span class="t-num" style="font-size:${getNumSize(GAME.players)}">№${i}</span>`;
     cell.addEventListener('click', () => selectCell(i));
     grid.appendChild(cell);
@@ -142,17 +159,28 @@ function selectCell(num) {
   const cell = document.getElementById(`cell-${num}`);
   if (!cell || cell.classList.contains('won') || cell.classList.contains('lost')) return;
 
-  if (state.chosen) document.getElementById(`cell-${state.chosen}`)?.classList.remove('chosen');
+  if (state.chosen && state.chosen !== num) {
+    const prev = document.getElementById(`cell-${state.chosen}`);
+    if (prev) {
+      prev.classList.remove('chosen');
+      if (!prev.classList.contains('won') && !prev.classList.contains('lost')) {
+        prev.querySelector('.t-img').src = 'img/taz.png';
+      }
+    }
+  }
 
   state.chosen = num;
   document.getElementById('inputZone').classList.add('has-selection');
+  document.getElementById('flushBtn').classList.add('active-btn');
+  // Меняем картинку выбранной ячейки
+  cell.querySelector('.t-img').src = 'img/taz_aktiv.png';
   cell.classList.add('chosen');
 
   const inp = document.getElementById('toiletInput');
   inp.value = num;
   inp.classList.add('has-val');
   document.getElementById('flushBtn').disabled = false;
-
+  playSound('click');
   if (tg?.HapticFeedback) tg.HapticFeedback.selectionChanged();
 }
 
@@ -163,13 +191,28 @@ function onInputChange(val) {
 }
 
 function changeInput(delta) {
-  selectCell(Math.max(1, Math.min(TOTAL_BALLS, (state.chosen || 0) + delta)));
+  playSound('click');
+  let next = (state.chosen || 0) + delta;
+  while (next >= 1 && next <= TOTAL_BALLS && state.opened[next]) {
+    next += delta;
+  }
+  if (next >= 1 && next <= TOTAL_BALLS) selectCell(next);
 }
 
 function clearChosen() {
-  if (state.chosen) document.getElementById(`cell-${state.chosen}`)?.classList.remove('chosen');
+  if (state.chosen) {
+    const prevCell = document.getElementById(`cell-${state.chosen}`);
+    if (prevCell) {
+      prevCell.classList.remove('chosen');
+      const prevImg = prevCell.querySelector('.t-img');
+      if (prevImg && !prevCell.classList.contains('won') && !prevCell.classList.contains('lost')) {
+        prevImg.src = 'img/taz.png';
+      }
+    }
+  }
   state.chosen = null;
   document.getElementById('inputZone').classList.remove('has-selection');
+  document.getElementById('flushBtn').classList.remove('active-btn');
   document.getElementById('flushBtn').disabled = true;
   document.getElementById('toiletInput').classList.remove('has-val');
 }
@@ -193,6 +236,7 @@ function pickRandom() {
 function doFlush() {
   if (!state.myTurn || !state.chosen || state.animating) return;
   stopTimer();
+  playSound('flush');
   openBall(state.chosen, true);
 }
 
@@ -212,8 +256,8 @@ function openBall(num, isMe) {
   if (isWin) {
     const openedWins = Object.values(state.opened).filter(v => v === 'won').length;
     const pct   = getPrizePercent(GAME.players, openedWins);
-    const prize = parseFloat((parseFloat(PRIZE_POOL) * pct / 100).toFixed(3));
-    state.prizes[pIdx] = (state.prizes[pIdx] || 0) + prize;
+    const prize = (parseFloat(PRIZE_POOL) * pct / 100).toFixed(3);
+    state.prizes[pIdx] = (state.prizes[pIdx] || 0) + parseFloat(prize);
   }
 
   if (isMe) {
@@ -235,15 +279,14 @@ function applyOpenedCell(num, isWin) {
   const cell = document.getElementById(`cell-${num}`);
   if (!cell) return;
   const img = cell.querySelector('.t-img');
-  img.src = isWin ? 'img/govno.png' : 'img/taz.png';
-  img.style.opacity = isWin ? '1' : '0.25';
-  cell.classList.remove('mine','chosen','dim');
+  img.src = isWin ? 'img/govno_pobeda.png' : 'img/taz_s_muha.png';
+  img.style.opacity = '1';
+  cell.classList.remove('mine', 'chosen', 'dim');
   cell.classList.add(isWin ? 'won' : 'lost');
 }
 
 // ── АНИМАЦИЯ СМЫВА — ПОЛНЫЙ СБРОС ──
 function showFlushAnim(num, isWin, cb) {
-  
   if (showFlushAnim._timers) {
     showFlushAnim._timers.forEach(clearTimeout);
   }
@@ -257,12 +300,12 @@ function showFlushAnim(num, isWin, cb) {
 
   // 1. Полностью чистим предыдущее состояние ДО показа
   inner.querySelectorAll('.fa-caption,.fa-prize,.fa-pobeda').forEach(e => e.remove());
-  toilet.textContent      = '🚽';
-  toilet.style.animation  = 'toiletShake .15s ease-in-out infinite';
-  swirl.style.display     = 'none';
-  swirl.style.animation   = 'swirlSpin .6s linear infinite';
+  toilet.textContent     = '🚽';
+  toilet.style.display   = 'block';
+  toilet.style.animation = 'toiletShake .15s ease-in-out infinite';
+  swirl.style.display    = 'none';
   result.classList.add('hidden');
-  result.textContent      = '';
+  result.textContent     = '';
 
   // 2. Показываем оверлей
   anim.classList.remove('hidden');
@@ -270,49 +313,48 @@ function showFlushAnim(num, isWin, cb) {
   // 3. Фаза: крутилка через 400мс
   showFlushAnim._timers.push(setTimeout(() => {
     swirl.style.display = 'block';
-  }, 400));
+  }, 1000));
 
   // 4. Фаза: результат через 1000мс
   showFlushAnim._timers.push(setTimeout(() => {
-    swirl.style.display   = 'none';
-    toilet.style.display = 'none';
+    swirl.style.display    = 'none';
     toilet.style.animation = 'none';
 
     if (isWin) {
-      const pobImg = document.createElement('img');
-      pobImg.src = 'img/pobeda.png';
-      pobImg.className = 'fa-pobeda';
-      inner.appendChild(pobImg);
-    }
-    const cap = document.createElement('div');
-    cap.className   = `fa-caption ${isWin ? 'win' : 'lose'}`;
-    cap.textContent = isWin ? '💰 Выигрыш!' : '🪰 Пусто...';
-    inner.appendChild(cap);
-
-    if (isWin) {
+      toilet.style.display = 'none';
       const openedWins = Object.values(state.opened).filter(v => v === 'won').length;
       const pct   = getPrizePercent(GAME.players, openedWins);
       const prize = (parseFloat(PRIZE_POOL) * pct / 100).toFixed(3);
-      const pEl   = document.createElement('div');
-      pEl.className   = 'fa-prize';
-      pEl.textContent = `+${prize} GOVNO`;
-      inner.appendChild(pEl);
+      anim.classList.add('hidden');
+      document.getElementById('wsNum').textContent   = `№${num} — ПРИЗ!`;
+      document.getElementById('wsPrize').textContent = `+${prize} GOVNO`;
+      document.getElementById('winScreen').classList.remove('hidden');
+      playSound('win');
       if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
     } else {
+      toilet.textContent   = '🪰';
+      toilet.style.display = 'block';
+      const cap = document.createElement('div');
+      cap.className   = 'fa-caption lose';
+      cap.textContent = '🪰 Пусто...';
+      inner.appendChild(cap);
+      playSound('lose');
       if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('warning');
     }
-  }, 1000));
+  }, 2000));
 
-  // 5. Закрываем через 2600мс — достаточно чтобы прочитать результат
+  // 5. Закрываем через 5000мс — достаточно чтобы прочитать результат
   showFlushAnim._timers.push(setTimeout(() => {
     inner.querySelectorAll('.fa-caption,.fa-prize,.fa-pobeda').forEach(e => e.remove());
     result.classList.add('hidden');
-    toilet.textContent = '🚽';
-    toilet.style.display = '';
+    toilet.textContent     = '🚽';
+    toilet.style.display   = 'block';
+    toilet.style.animation = 'toiletShake .15s ease-in-out infinite';
     anim.classList.add('hidden');
-    showFlushAnim._timers = [];
+    document.getElementById('winScreen').classList.add('hidden');
+    showFlushAnim._timers  = [];
     cb();
-  }, 2600));
+  }, isWin ? 6000 : 6000));
 }
 
 function getPrizePercent(players, winIdx) {
@@ -370,7 +412,7 @@ function showAttemptBanner(attempt, cb) {
   sub.className   = 'fa-caption';
   sub.style.fontSize = '13px';
   sub.style.color    = 'var(--text-rust)';
-  sub.textContent = 'Порядок ходов обратный';
+  sub.textContent = attempt === 1 ? 'Найди приз среди унитазов!' : 'Порядок ходов обратный';
   inner.appendChild(sub);
 
   anim.classList.remove('hidden');
@@ -380,7 +422,7 @@ function showAttemptBanner(attempt, cb) {
     anim.classList.add('hidden');
     toilet.textContent = '🚽';
     cb();
-  }, 1800);
+  }, 4000);
 }
 
 // ── ТАЙМЕР ──
@@ -416,7 +458,8 @@ function showResults() {
   const screen = document.getElementById('resultsScreen');
   const table  = document.getElementById('rsTable');
 
-  const results = PLAYERS.map((name, i) => ({
+  const activePlayers = PLAYERS.slice(0, GAME.players);
+  const results = activePlayers.map((name, i) => ({
     name,
     prize: parseFloat((state.prizes[i] || 0).toFixed(3)),
     isMe:  i === GAME.myIndex,

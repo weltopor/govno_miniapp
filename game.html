@@ -78,7 +78,7 @@
     <!-- Заблокированный оверлей (не твой ход) -->
     <div class="wait-overlay hidden" id="waitOverlay">
       <div class="wo-text">Ждём <span id="woPlayer">@kate</span></div>
-      <div class="wo-sub">Не твой ход...</div>
+      <div class="wo-not-your-turn">Не твой ход</div>
     </div>
 
   </div>
@@ -89,6 +89,16 @@
       <div class="fa-toilet" id="faToilet">🚽</div>
       <div class="fa-swirl" id="faSwirl">🌀</div>
       <div class="fa-result hidden" id="faResult"></div>
+    </div>
+  </div>
+
+  <!-- ░░ ПОБЕДНЫЙ ЭКРАН ░░ -->
+  <div class="win-screen hidden" id="winScreen">
+    <div class="ws-content">
+      <div class="ws-title">ТЫ УГАДАЛ!</div>
+      <div class="ws-toilet">🚽</div>
+      <div class="ws-num" id="wsNum">№18 — ПРИЗ!</div>
+      <div class="ws-prize" id="wsPrize">+1.95 GOVNO</div>
     </div>
   </div>
 
