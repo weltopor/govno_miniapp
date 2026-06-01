@@ -6,22 +6,6 @@
 const tg = window.Telegram?.WebApp;
 if (tg) { tg.ready(); tg.expand(); tg.setHeaderColor('#1a1408'); tg.setBackgroundColor('#1a1408'); }
 
-// ── ЗВУКИ ──
-const SFX = {
-  click: new Audio('sounds/click.ogg'),
-  flush: new Audio('sounds/flush.ogg'),
-  win:   new Audio('sounds/win.ogg'),
-  lose:  new Audio('sounds/lose.ogg'),
-};
-Object.values(SFX).forEach(a => { a.preload = 'auto'; a.volume = 0.6; });
-
-function playSound(name) {
-  const s = SFX[name];
-  if (!s) return;
-  s.currentTime = 0;
-  s.play().catch(() => {});
-}
-
 // ── КОНФИГУРАЦИЯ ИГРЫ ──
 const params = new URLSearchParams(window.location.search);
 const GAME = {
@@ -179,8 +163,7 @@ function selectCell(num) {
   const inp = document.getElementById('toiletInput');
   inp.value = num;
   inp.classList.add('has-val');
-  document.getElementById('flushBtn').disabled = false;
-  playSound('click');
+  document.getElementById('flushBtn').disabled = false;  
   if (tg?.HapticFeedback) tg.HapticFeedback.selectionChanged();
 }
 
@@ -190,8 +173,7 @@ function onInputChange(val) {
   selectCell(num);
 }
 
-function changeInput(delta) {
-  playSound('click');
+function changeInput(delta) {  
   let next = (state.chosen || 0) + delta;
   while (next >= 1 && next <= TOTAL_BALLS && state.opened[next]) {
     next += delta;
@@ -235,8 +217,7 @@ function pickRandom() {
 // ── СМЫТЬ ──
 function doFlush() {
   if (!state.myTurn || !state.chosen || state.animating) return;
-  stopTimer();
-  playSound('flush');
+  stopTimer();  
   openBall(state.chosen, true);
 }
 
@@ -328,8 +309,7 @@ function showFlushAnim(num, isWin, cb) {
       anim.classList.add('hidden');
       document.getElementById('wsNum').textContent   = `№${num} — ПРИЗ!`;
       document.getElementById('wsPrize').textContent = `+${prize} GOVNO`;
-      document.getElementById('winScreen').classList.remove('hidden');
-      playSound('win');
+      document.getElementById('winScreen').classList.remove('hidden');      
       if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
     } else {
       toilet.textContent   = '🪰';
@@ -337,8 +317,7 @@ function showFlushAnim(num, isWin, cb) {
       const cap = document.createElement('div');
       cap.className   = 'fa-caption lose';
       cap.textContent = '🪰 Пусто...';
-      inner.appendChild(cap);
-      playSound('lose');
+      inner.appendChild(cap);      
       if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('warning');
     }
   }, 2000));
@@ -521,3 +500,68 @@ function startGame() {
 }
 
 document.addEventListener('DOMContentLoaded', runLoader);
+
+// Функция для сохранения матча в историю
+function saveMatchToHistory(isWin) {
+  // 1. Получаем текущую историю или создаем пустой массив, если её еще нет
+  let history = JSON.parse(localStorage.getItem('govno_game_history')) || [];
+
+  // 2. Создаем объект нового матча
+  const newMatch = {
+    id: GAME.id || 1107,
+    date: new Date().toLocaleDateString('ru-RU'),
+    nominal: GAME.nominal,
+    players: GAME.players,
+    result: isWin ? 'win' : 'lose',
+    reward: isWin ? (GAME.nominal * GAME.players).toFixed(2) : 0
+  };
+
+  // 3. Добавляем в начало массива (чтобы свежие игры были сверху)
+  history.unshift(newMatch);
+
+  // 4. Храним, например, только последние 20 игр, чтобы не забивать память
+  if (history.length > 20) history.pop();
+
+  // 5. Сохраняем обратно в браузер
+  localStorage.setItem('govno_game_history', JSON.stringify(history));
+}
+
+// ── ОТПРАВКА МАТЧА НА СЕРВЕР ──
+function saveMatchToServer(isWin) {
+  // Получаем ID пользователя из Telegram WebApp
+  const userId = tg?.initDataUnsafe?.user?.id || 0;
+  const username = tg?.initDataUnsafe?.user?.username || 'anonymous';
+
+  // Данные, которые мы отправляем бэкенду
+  const matchData = {
+    userId: userId,
+    username: username,
+    gameId: GAME.id,
+    nominal: GAME.nominal,
+    players: GAME.players,
+    result: isWin ? 'win' : 'lose',
+    reward: isWin ? (GAME.nominal * GAME.players).toFixed(2) : '0.00',
+    authData: window.Telegram?.WebApp?.initData // Важно! Передаем строку инициализации для проверки подлинности на сервере
+  };
+
+  // Отправляем POST-запрос на ваш будущий сервер
+  fetch('https://your-backend-api.com/api/history/save', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(matchData)
+  })
+  .then(response => {
+    if (!response.ok) throw new Error('Ошибка сети');
+    return response.json();
+  })
+  .then(data => {
+    console.log('Игра успешно сохранена на сервере:', data);
+  })
+  .catch(error => {
+    console.error('Не удалось сохранить игру на сервере:', error);
+    // Резервный вариант: если сервер упал, можно временно сохранить в localStorage
+    saveToBackupLocalStorage(matchData);
+  });
+}

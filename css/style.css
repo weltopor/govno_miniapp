@@ -719,29 +719,3 @@ body::before {
   filter: brightness(1) saturate(1) drop-shadow(0 0 6px rgba(220,160,0,.5));
 }
 
-/* ── МУХИ В ШАПКЕ ── */
-.header-fly {
-  position: absolute;
-  font-size: 14px;
-  cursor: pointer;
-  z-index: 3;
-  user-select: none;
-  animation: headerFlyAnim 1s ease-in-out infinite;
-}
-
-#hfly1 { animation-duration: 7s;  animation-delay: 0s; }
-#hfly2 { animation-duration: 9s;  animation-delay: 1.5s; }
-#hfly3 { animation-duration: 6s;  animation-delay: 3s; }
-#hfly4 { animation-duration: 11s; animation-delay: 0.8s; }
-#hfly5 { animation-duration: 8s;  animation-delay: 2.2s; }
-
-@keyframes headerFlyAnim {
-  0%   { transform: translate(0, 0) rotate(0deg);    opacity: 0; }
-  10%  { opacity: .8; }
-  25%  { transform: translate(30px, -12px) rotate(20deg); }
-  50%  { transform: translate(-20px, 8px) rotate(-15deg); opacity: .7; }
-  75%  { transform: translate(40px, -5px) rotate(10deg); }
-  90%  { opacity: .6; }
-  100% { transform: translate(0, 0) rotate(0deg);    opacity: 0; }
-}
-

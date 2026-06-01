@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════════
    GOVNO ne TONet — app.js
-   Telegram Mini App логика
+   Telegram Mini App логика (Оптимизированная)
 ═══════════════════════════════════════════ */
 
 // ── Инициализация Telegram WebApp ──
@@ -10,16 +10,6 @@ if (tg) {
   tg.expand(); // Разворачиваем на весь экран
   tg.setHeaderColor('#0e0a06');
   tg.setBackgroundColor('#0e0a06');
-}
-
-// ── ЗВУК МЕНЮ ──
-const menuClick = new Audio('sounds/menu_click.ogg');
-menuClick.preload = 'auto';
-menuClick.volume = 0.6;
-
-function playMenuClick() {
-  menuClick.currentTime = 0;
-  menuClick.play().catch(() => {});
 }
 
 // ── Toast уведомление ──
@@ -37,10 +27,8 @@ function showToast(msg) {
 
 // ── Кнопка ВОЙТИ ──
 function joinLobby(btn, nominal) {
-  playMenuClick();
   // Проверяем: кошелёк подключён?
   if (!walletConnected) {
-    // Для тестирования — автоподключение
     walletConnected = true;
     document.querySelector('.wallet-dot').classList.add('connected');
     document.getElementById('walletShort').textContent = 'TEST...wallet';
@@ -72,11 +60,10 @@ function joinLobby(btn, nominal) {
 
   // Переходим на экран игры через 1.5 сек
   setTimeout(() => {
-  const players = parseInt(card.dataset.players) || 10;
-  window.location.href = `game.html?nominal=${nominal}&players=${players}`;
+    const players = parseInt(card.dataset.players) || 10;
+    window.location.href = `game.html?nominal=${nominal}&players=${players}`;
   }, 1500);
 
-  // Лёгкая вибрация (если поддерживается)
   if (tg?.HapticFeedback) {
     tg.HapticFeedback.impactOccurred('medium');
   }
@@ -96,8 +83,7 @@ function highlightWallet() {
 }
 
 // ── Переключение вкладок ──
-function switchTab(btn, tab) {
-  playMenuClick();
+function switchTab(btn, tab) {  
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
 
@@ -115,16 +101,19 @@ function startLobbyTimers() {
   let seconds = 6 * 60 + 23; // 6:23
 
   setInterval(() => {
-    seconds = Math.max(0, seconds - 1);
+    if (seconds <= 0) {
+      seconds = 10 * 60; // Перезапуск на 10 минут, если таймер дошел до конца
+    } else {
+      seconds--;
+    }
+
     const m = String(Math.floor(seconds / 60)).padStart(2, '0');
     const s = String(seconds % 60).padStart(2, '0');
     const txt = seconds > 0 ? `Старт через ${m}:${s}` : '🔄 Обновление...';
+    
     document.querySelectorAll('.lobby-timer-txt').forEach(el => {
       el.textContent = txt;
     });
-    if (seconds === 0) {
-      setTimeout(() => { seconds = 10 * 60; }, 2000); // новая заявка через 10 мин
-    }
   }, 1000);
 }
 
@@ -140,48 +129,71 @@ function animateCounter(el, target, duration = 1200) {
   }, 16);
 }
 
-// ── Инициализация ──
+// ── СЕРВЕРНАЯ ИСТОРИЯ ИГР (ИМИТАЦИЯ ЗАГЛУШКИ) ──
+function loadServerHistory() {
+  const container = document.getElementById('historyContainer');
+  if (!container) return;
+
+  // Имитируем массив данных от бэкенда
+  const mockServerData = [
+    { gameId: 1109, nominal: 2.0, players: 10, result: 'lose', createdAt: new Date() },
+    { gameId: 1108, nominal: 0.5, players: 2,  result: 'win',  reward: '1.00', createdAt: new Date(Date.now() - 3600000) },
+    { gameId: 1105, nominal: 1.0, players: 5,  result: 'win',  reward: '5.00', createdAt: new Date(Date.now() - 86400000) }
+  ];
+
+  // Имитируем задержку сети 800мс
+  setTimeout(() => {
+    container.innerHTML = ''; 
+
+    if (mockServerData.length === 0) {
+      container.innerHTML = `<div class="history-empty" style="text-align:center; color:#8a7048; padding:15px;">У вас пока нет сыгранных матчей... 🚽</div>`;
+      return;
+    }
+
+    // Рендерим карточки
+    container.innerHTML = mockServerData.map(match => {
+      const isWin = match.result === 'win';
+      const badgeColor = isWin ? '#2a6020' : '#8b4513';
+      const badgeText = isWin ? 'ПОБЕДА' : 'ОТПЛЫЛ';
+      const profitText = isWin ? `+${match.reward}` : `-${match.nominal}`;
+      const profitColor = isWin ? '#e8c040' : '#d08050';
+      const matchDate = match.createdAt.toLocaleDateString('ru-RU');
+
+      return `
+        <div class="history-card" style="display:flex; justify-content:space-between; align-items:center; background:#2a2010; border:1px solid #6a4820; border-radius:8px; padding:10px; margin-bottom:8px; font-size:14px;">
+          <div class="hc-left" style="display:flex; flex-direction:column; gap:4px;">
+            <div style="font-weight:bold; color:var(--text-gold);">Игра #${match.gameId} <span style="font-size:11px; color:#8a7048; font-weight:normal;">(${matchDate})</span></div>
+            <div style="font-size:12px; color:#8a7048;">Номинал: ${match.nominal} GOVNO | Игроков: ${match.players}</div>
+          </div>
+          <div class="hc-right" style="text-align:right; display:flex; flex-direction:column; gap:4px;">
+            <span style="background:${badgeColor}; color:#fff; font-size:10px; padding:2px 6px; border-radius:4px; font-weight:bold; text-align:center;">${badgeText}</span>
+            <span style="color:${profitColor}; font-weight:bold; font-size:13px;">${profitText}</span>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }, 800);
+}
+
+// ── Инициализация приложения ──
 document.addEventListener('DOMContentLoaded', () => {
   startLobbyTimers();
 
-  document.getElementById('walletBadge').addEventListener('click', () => {
-    playMenuClick();
+  document.getElementById('walletBadge').addEventListener('click', () => {    
     if (walletConnected) {
       showToast('💰 Кошелёк уже подключён');
       return;
     }
-    // Здесь будет TON Connect 2.0
-    // Пока — заглушка
     showToast('🔗 Подключаем TON-кошелёк...');
     setTimeout(() => {
       walletConnected = true;
-      const dot = document.querySelector('.wallet-dot');
-      const short = document.getElementById('walletShort');
-      dot.classList.add('connected');
-      short.textContent = 'UQAb...f3Kp';
+      document.querySelector('.wallet-dot').classList.add('connected');
+      document.getElementById('walletShort').textContent = 'UQAb...f3Kp';
       showToast('✅ Кошелёк подключён!');
       if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
     }, 1200);
   });
-
-  // Приветственный звук
-  if (!sessionStorage.getItem('welcomePlayed')) {
-    const welcomeSound = new Audio('sounds/welcome.ogg');
-    welcomeSound.preload = 'auto';
-    welcomeSound.volume = 0.7;
-
-    const playWelcome = () => {
-      welcomeSound.play()
-        .then(() => {
-          sessionStorage.setItem('welcomePlayed', '1');
-        })
-        .catch(() => {});
-    };
-
-    document.addEventListener('click', playWelcome, { once: true });
-    document.addEventListener('touchstart', playWelcome, { once: true });
-  }
-
+  
   // Анимируем счётчики банков при загрузке
   setTimeout(() => {
     animateCounter(document.getElementById('weeklyAmount'),  1284.50);
@@ -194,30 +206,6 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => showToast(`Добро пожаловать, ${user.first_name}! 💩`), 800);
   }
 
-  setTimeout(initFlies, 500);
+  // Запуск загрузки истории игр
+  loadServerHistory();
 });
-
-// ── МУХИ ЖУЖЖАТ ──
-// Создаём заранее чтобы браузер не блокировал
-const buzzSound = new Audio('sounds/buzz.ogg');
-buzzSound.preload = 'auto';
-buzzSound.volume = 0.5;
-
-function initFlies() {
-  document.querySelectorAll('.fly').forEach(fly => {
-    fly.style.cursor = 'pointer';
-    fly.addEventListener('click', (e) => {
-      e.stopPropagation(); // не триггерим welcomeSound
-      const buzz = new Audio('sounds/buzz.ogg');
-      buzz.volume = 0.5;
-      buzz.play().catch(err => console.log('buzz error:', err));
-      fly.style.fontSize = '20px';
-      setTimeout(() => fly.style.fontSize = '13px', 300);
-    });
-  });
-}
-
-function goToMap() {
-  playMenuClick();
-  window.location.href = 'map.html';
-}

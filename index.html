@@ -12,14 +12,7 @@
 <body>
 
   <!-- ░░ ФОНОВЫЕ ЧАСТИЦЫ ░░ -->
-  <div class="bg-layer">
-    <div class="fly" id="fly1">🪰</div>
-    <div class="fly" id="fly2">🪰</div>
-    <div class="fly" id="fly3">🪰</div>
-    <div class="fly" id="fly4">🪰</div>
-    <div class="fly" id="fly5">🪰</div>
-    <div class="fly" id="fly6">🪰</div>
-    <div class="fly" id="fly7">🪰</div>
+  <div class="bg-layer">    
     <div class="steam" id="s1"></div>
     <div class="steam" id="s2"></div>
     <div class="steam" id="s3"></div>
@@ -144,6 +137,30 @@
 
     </section>
 
+    <section class="history-section" style="margin-top: 25px; padding: 0 16px;">
+      <div class="section-title">
+        <span class="title-line"></span>
+        <span class="title-text">📜 ИСТОРИЯ ИГР 📜</span>
+        <span class="title-line"></span>
+      </div>
+      <div id="historyContainer" class="history-container">
+        <div class="history-empty" style="text-align:center; color:var(--text-dim); padding:15px;">Игр пока не зафиксировано... 🚽</div>
+      </div>
+    </section>
+
+    <section class="history-section" style="margin-top: 25px; padding: 0 16px;">
+      <div class="section-title">
+        <span class="title-line"></span>
+        <span class="title-text">📜 ИСТОРИЯ ИГР 📜</span>
+        <span class="title-line"></span>
+      </div>
+      <div id="historyContainer" class="history-container">
+        <div id="historyLoader" style="text-align:center; color:var(--text-gold); padding:20px;">
+          ⏳ Соединение с сервером...
+        </div>
+      </div>
+    </section>
+
   </main>
 
   <!-- ░░ НИЖНЯЯ НАВИГАЦИЯ ░░ -->
@@ -152,15 +169,15 @@
       <img class="nav-icon-img" src="img/icons/nav-home.png" alt="">
       <span class="nav-label">Главная</span>
     </button>
-    <button class="nav-btn" onclick="goToMap()">
+    <button class="nav-btn" onclick="showToast(' 🚧  Раздел в разработке...')">
       <img class="nav-icon-img" src="img/icons/nav-navi.png" alt="">
       <span class="nav-label">Карта</span>
     </button>
-    <button class="nav-btn" onclick="switchTab(this,'rating')">
+    <button class="nav-btn" onclick="showToast(' 🚧  Раздел в разработке...')">
       <img class="nav-icon-img" src="img/icons/nav-rating.png" alt="">
       <span class="nav-label">Рейтинг</span>
     </button>
-    <button class="nav-btn" onclick="switchTab(this,'profile')">
+    <button class="nav-btn" onclick="showToast(' 🚧  Раздел в разработке...')">
       <img class="nav-icon-img" src="img/icons/nav-time.png" alt="">
       <span class="nav-label">Билеты</span>
     </button>
