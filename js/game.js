@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════════
-   GOVNO ne TONet — game.js  v2.1
-   Логика экрана игры
+   GOVNO ne TONet — game.js  v3.5
+   Логика экрана игры на базе официальных матриц
 ═══════════════════════════════════════════ */
 
 const tg = window.Telegram?.WebApp;
@@ -15,18 +15,24 @@ const GAME = {
   myIndex: 1,
 };
 
-const PLAYERS = ['@igor','@anna','@max','@you','@kate','@dima','@alex','@mia','@oleg','@lena'];
+const PLAYERS = ['@igor','@anna','@max','@you','@kate','@dima','@alex','@mia','@oleg','@lena','@vanya','@sasha','@olga','@ivan','@petr'];
 
-const TOTAL_BALLS = GAME.players * 2;
-const WIN_BALLS   = GAME.players + 1;
-const PRIZE_POOL  = (GAME.players * GAME.nominal * 0.975).toFixed(2);
+// ── ГЕНЕРАЦИЯ ДИНАМИЧЕСКОЙ МАТРИЦЫ НА СТАРТЕ ──
+const ROOM_DATA = generateGameBallsMatrix(GAME.nominal, GAME.players);
 
-function genWinners(total, wins) {
-  const s = new Set();
-  while (s.size < wins) s.add(Math.floor(Math.random() * total) + 1);
-  return s;
+const TOTAL_BALLS = ROOM_DATA.totalBallsGenerated; // ВСЕГДА Игроки * 2
+const PRIZE_POOL  = ROOM_DATA.netPrizeBank.toFixed(2); // Чистый банк монет после комиссии 4.5%
+
+// Перемешиваем сгенерированные шары (монеты, билеты, пустышки)
+function shuffleArray(array) {
+  const arr = [...array];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
 }
-const WINNERS = genWinners(TOTAL_BALLS, WIN_BALLS);
+const GAME_BALLS = shuffleArray(ROOM_DATA.balls);
 
 // ── СОСТОЯНИЕ ──
 let state = {
@@ -40,8 +46,9 @@ let state = {
   finished: false,
   timer:    30,
   timerRef: null,
-  animating: false,   // ← флаг: идёт анимация смыва
-  prizes:   {},
+  animating: false,
+  prizes:   {}, // Баланс монет игроков
+  tickets:  {}, // Баланс билетов игроков
 };
 
 // ── СЕТКА ──
@@ -54,7 +61,6 @@ function getGridCols(p) {
 function getEmojiSize(p) {
   return '60%';
 }
-
 function getNumSize(p) {
   if (p <= 7)  return '10px';
   if (p <= 12) return '9px';
@@ -100,7 +106,7 @@ function renderQueue() {
 
 // ── ХОД ──
 function updateTurnUI() {
-  if (state.animating) return; // не обновляем пока идёт анимация
+  if (state.animating) return;
   const order  = state.attempt === 1 ? state.order : state.order2;
   const pIdx   = order[state.curTurn];
   const myTurn = pIdx === GAME.myIndex;
@@ -110,7 +116,7 @@ function updateTurnUI() {
   document.getElementById('curAttempt').textContent = `Попытка ${state.attempt}/2`;
 
   document.querySelectorAll('.t-cell').forEach(cell => {
-    if (cell.classList.contains('won') || cell.classList.contains('lost')) return;
+    if (cell.classList.contains('won') || cell.classList.contains('lost') || cell.classList.contains('ticket-won')) return;
     cell.classList.toggle('dim', !myTurn);
     if (myTurn) cell.classList.remove('mine');
   });
@@ -141,13 +147,13 @@ function updateTurnUI() {
 function selectCell(num) {
   if (!state.myTurn || state.animating) return;
   const cell = document.getElementById(`cell-${num}`);
-  if (!cell || cell.classList.contains('won') || cell.classList.contains('lost')) return;
+  if (!cell || cell.classList.contains('won') || cell.classList.contains('lost') || cell.classList.contains('ticket-won')) return;
 
   if (state.chosen && state.chosen !== num) {
     const prev = document.getElementById(`cell-${state.chosen}`);
     if (prev) {
       prev.classList.remove('chosen');
-      if (!prev.classList.contains('won') && !prev.classList.contains('lost')) {
+      if (!prev.classList.contains('won') && !prev.classList.contains('lost') && !prev.classList.contains('ticket-won')) {
         prev.querySelector('.t-img').src = 'img/taz.png';
       }
     }
@@ -156,7 +162,6 @@ function selectCell(num) {
   state.chosen = num;
   document.getElementById('inputZone').classList.add('has-selection');
   document.getElementById('flushBtn').classList.add('active-btn');
-  // Меняем картинку выбранной ячейки
   cell.querySelector('.t-img').src = 'img/taz_aktiv.png';
   cell.classList.add('chosen');
 
@@ -187,7 +192,7 @@ function clearChosen() {
     if (prevCell) {
       prevCell.classList.remove('chosen');
       const prevImg = prevCell.querySelector('.t-img');
-      if (prevImg && !prevCell.classList.contains('won') && !prevCell.classList.contains('lost')) {
+      if (prevImg && !prevCell.classList.contains('won') && !prevCell.classList.contains('lost') && !prevCell.classList.contains('ticket-won')) {
         prevImg.src = 'img/taz.png';
       }
     }
@@ -229,45 +234,54 @@ function botMove() {
 }
 
 function openBall(num, isMe) {
-  const isWin = WINNERS.has(num);
-  state.opened[num] = isWin ? 'won' : 'lost';
-  // Записываем реальный выигрыш
+  const ballData = GAME_BALLS[num - 1]; 
+  state.opened[num] = ballData.type; 
+  
   const order = state.attempt === 1 ? state.order : state.order2;
   const pIdx  = order[state.curTurn];
-  if (isWin) {
-    const openedWins = Object.values(state.opened).filter(v => v === 'won').length;
-    const pct   = getPrizePercent(GAME.players, openedWins);
-    const prize = (parseFloat(PRIZE_POOL) * pct / 100).toFixed(3);
-    state.prizes[pIdx] = (state.prizes[pIdx] || 0) + parseFloat(prize);
+
+  if (ballData.type === 'coin') {
+    state.prizes[pIdx] = (state.prizes[pIdx] || 0) + ballData.coins;
+  } else if (ballData.type === 'ticket') {
+    state.tickets[pIdx] = (state.tickets[pIdx] || 0) + ballData.tickets;
   }
 
   if (isMe) {
     state.animating = true;
-    showFlushAnim(num, isWin, () => {
+    showFlushAnim(num, ballData, () => {
       state.animating = false;
-      applyOpenedCell(num, isWin);
+      applyOpenedCell(num, ballData);
       clearChosen();
       document.getElementById('toiletInput').value = '';
       nextTurn();
     });
   } else {
-    applyOpenedCell(num, isWin);
+    applyOpenedCell(num, ballData);
     nextTurn();
   }
 }
 
-function applyOpenedCell(num, isWin) {
+function applyOpenedCell(num, ballData) {
   const cell = document.getElementById(`cell-${num}`);
   if (!cell) return;
   const img = cell.querySelector('.t-img');
-  img.src = isWin ? 'img/govno_pobeda.png' : 'img/taz_s_muha.png';
+  
+  if (ballData.type === 'coin') {
+    img.src = 'img/govno_pobeda.png';
+    cell.classList.add('won');
+  } else if (ballData.type === 'ticket') {
+    img.src = 'img/govno_pobeda.png'; // Можешь заменить картинку на билет, если есть
+    cell.classList.add('ticket-won');
+  } else {
+    img.src = 'img/taz_s_muha.png'; // Пустышка (муха)
+    cell.classList.add('lost');
+  }
   img.style.opacity = '1';
   cell.classList.remove('mine', 'chosen', 'dim');
-  cell.classList.add(isWin ? 'won' : 'lost');
 }
 
-// ── АНИМАЦИЯ СМЫВА — ПОЛНЫЙ СБРОС ──
-function showFlushAnim(num, isWin, cb) {
+// ── АНИМАЦИЯ СМЫВА ──
+function showFlushAnim(num, ballData, cb) {
   if (showFlushAnim._timers) {
     showFlushAnim._timers.forEach(clearTimeout);
   }
@@ -279,7 +293,6 @@ function showFlushAnim(num, isWin, cb) {
   const swirl  = document.getElementById('faSwirl');
   const result = document.getElementById('faResult');
 
-  // 1. Полностью чистим предыдущее состояние ДО показа
   inner.querySelectorAll('.fa-caption,.fa-prize,.fa-pobeda').forEach(e => e.remove());
   toilet.textContent     = '🚽';
   toilet.style.display   = 'block';
@@ -288,28 +301,34 @@ function showFlushAnim(num, isWin, cb) {
   result.classList.add('hidden');
   result.textContent     = '';
 
-  // 2. Показываем оверлей
   anim.classList.remove('hidden');
 
-  // 3. Фаза: крутилка через 400мс
   showFlushAnim._timers.push(setTimeout(() => {
     swirl.style.display = 'block';
   }, 1000));
 
-  // 4. Фаза: результат через 1000мс
   showFlushAnim._timers.push(setTimeout(() => {
     swirl.style.display    = 'none';
     toilet.style.animation = 'none';
 
-    if (isWin) {
+    if (ballData.type === 'coin') {
       toilet.style.display = 'none';
-      const openedWins = Object.values(state.opened).filter(v => v === 'won').length;
-      const pct   = getPrizePercent(GAME.players, openedWins);
-      const prize = (parseFloat(PRIZE_POOL) * pct / 100).toFixed(3);
       anim.classList.add('hidden');
-      document.getElementById('wsNum').textContent   = `№${num} — ПРИЗ!`;
-      document.getElementById('wsPrize').textContent = `+${prize} GOVNO`;
+      document.getElementById('wsNum').textContent   = `№${num} — МОНЕТЫ!`;
+      document.getElementById('wsPrize').textContent = `+${ballData.coins.toFixed(2)} GOVNO`;
       document.getElementById('winScreen').classList.remove('hidden');      
+      if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+    } else if (ballData.type === 'ticket') {
+      toilet.textContent   = '🎫';
+      toilet.style.display = 'block';
+      const cap = document.createElement('div');
+      cap.className   = 'fa-caption win';
+      cap.textContent = `№${num} — БИЛЕТ!`;
+      const prz = document.createElement('div');
+      prz.className   = 'fa-prize';
+      prz.textContent = `+${ballData.tickets} Лотерейный билет`;
+      inner.appendChild(cap);
+      inner.appendChild(prz);
       if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
     } else {
       toilet.textContent   = '🪰';
@@ -322,7 +341,6 @@ function showFlushAnim(num, isWin, cb) {
     }
   }, 2000));
 
-  // 5. Закрываем через 5000мс — достаточно чтобы прочитать результат
   showFlushAnim._timers.push(setTimeout(() => {
     inner.querySelectorAll('.fa-caption,.fa-prize,.fa-pobeda').forEach(e => e.remove());
     result.classList.add('hidden');
@@ -333,19 +351,7 @@ function showFlushAnim(num, isWin, cb) {
     document.getElementById('winScreen').classList.add('hidden');
     showFlushAnim._timers  = [];
     cb();
-  }, isWin ? 6000 : 6000));
-}
-
-function getPrizePercent(players, winIdx) {
-  const table = {
-    2:  [61.5, 23.1, 15.4],
-    5:  [30.8, 16.6, 15.2, 14.9, 12.4, 10.3],
-    10: [20.5, 8.5, 8.2, 7.2, 6.1, 5.1, 5.1, 5.1, 5.1, 5.1, 5.1],
-  };
-  const closest = [2, 5, 10].reduce((a, b) =>
-    Math.abs(b - players) < Math.abs(a - players) ? b : a);
-  const arr = table[closest];
-  return arr[Math.min(winIdx - 1, arr.length - 1)] || 5.1;
+  }, 5000));
 }
 
 // ── СЛЕДУЮЩИЙ ХОД ──
@@ -357,7 +363,6 @@ function nextTurn() {
       state.attempt  = 2;
       state.curTurn  = 0;
       state.myTurn   = false;
-      // Показываем плашку «Начинается попытка 2»
       showAttemptBanner(2, () => updateTurnUI());
     } else {
       setTimeout(showResults, 600);
@@ -429,7 +434,7 @@ function renderTimer() {
   el.classList.toggle('urgent', state.timer <= 8);
 }
 
-// ── ИТОГИ ──
+// ── ИТОГИ И ЭКРАН РЕЗУЛЬТАТОВ ──
 function showResults() {
   state.finished = true;
   stopTimer();
@@ -438,26 +443,51 @@ function showResults() {
   const table  = document.getElementById('rsTable');
 
   const activePlayers = PLAYERS.slice(0, GAME.players);
-  const results = activePlayers.map((name, i) => ({
-    name,
-    prize: parseFloat((state.prizes[i] || 0).toFixed(3)),
-    isMe:  i === GAME.myIndex,
-  })).sort((a, b) => b.prize - a.prize);
+  const results = activePlayers.map((name, i) => {
+    const coinPrize = parseFloat((state.prizes[i] || 0).toFixed(2));
+    const ticketPrize = state.tickets[i] || 0;
+    return {
+      name,
+      coinPrize,
+      ticketPrize,
+      isMe:  i === GAME.myIndex,
+    };
+  }).sort((a, b) => b.coinPrize - a.coinPrize || b.ticketPrize - a.ticketPrize);
 
   const me = results.find(r => r.isMe);
+  const totalMeWin = me.coinPrize;
 
-  document.getElementById('rsIcon').textContent   = me.prize > 0 ? '💩' : '🚽';
-  document.getElementById('rsTitle').textContent  = me.prize > 0 ? 'Ты нашёл приз!' : 'Не повезло в этот раз';
-  document.getElementById('rsAmount').textContent = me.prize > 0 ? `+${me.prize} GOVNO` : '0 GOVNO';
-  document.getElementById('rsAmount').style.color = me.prize > 0 ? '#4ade80' : 'var(--text-dim)';
+  document.getElementById('rsIcon').textContent   = totalMeWin > 0 ? '💩' : (me.ticketPrize > 0 ? '🎫' : '🚽');
+  document.getElementById('rsTitle').textContent  = totalMeWin > 0 ? 'Ты нашёл приз!' : (me.ticketPrize > 0 ? 'Ты выиграл билет!' : 'Не повезло в этот раз');
+  
+  if (totalMeWin > 0) {
+    document.getElementById('rsAmount').textContent = `+${totalMeWin.toFixed(2)} GOVNO` + (me.ticketPrize > 0 ? ` & +${me.ticketPrize} 🎫` : '');
+    document.getElementById('rsAmount').style.color = '#4ade80';
+  } else if (me.ticketPrize > 0) {
+    document.getElementById('rsAmount').textContent = `+${me.ticketPrize} БИЛЕТ`;
+    document.getElementById('rsAmount').style.color = '#38bdf8';
+  } else {
+    document.getElementById('rsAmount').textContent = '0 GOVNO';
+    document.getElementById('rsAmount').style.color = 'var(--text-dim)';
+  }
 
-  table.innerHTML = results.map(r => `
+  table.innerHTML = results.map(r => {
+    let prizeStr = '';
+    if (r.coinPrize > 0) prizeStr += `+${r.coinPrize.toFixed(2)} GOVNO`;
+    if (r.ticketPrize > 0) prizeStr += (prizeStr ? ' ' : '') + `+${r.ticketPrize} 🎫`;
+    if (!prizeStr) prizeStr = '—';
+
+    return `
     <div class="rs-row${r.isMe ? ' me' : ''}">
       <span class="rn">${r.name}${r.isMe ? ' 👤' : ''}</span>
-      <span class="${r.prize > 0 ? 'rv-win' : 'rv-lose'}">${r.prize > 0 ? '+' + r.prize + ' GOVNO' : '—'}</span>
-    </div>`).join('');
+      <span class="${r.coinPrize > 0 ? 'rv-win' : (r.ticketPrize > 0 ? 'rv-ticket' : 'rv-lose')}">${prizeStr}</span>
+    </div>`;
+  }).join('');
 
   screen.classList.remove('hidden');
+  
+  saveMatchToHistory(totalMeWin > 0);
+  saveMatchToServer(totalMeWin > 0);
 }
 
 function goHome() { window.location.href = 'index.html'; }
@@ -501,12 +531,8 @@ function startGame() {
 
 document.addEventListener('DOMContentLoaded', runLoader);
 
-// Функция для сохранения матча в историю
 function saveMatchToHistory(isWin) {
-  // 1. Получаем текущую историю или создаем пустой массив, если её еще нет
   let history = JSON.parse(localStorage.getItem('govno_game_history')) || [];
-
-  // 2. Создаем объект нового матча
   const newMatch = {
     id: GAME.id || 1107,
     date: new Date().toLocaleDateString('ru-RU'),
@@ -515,24 +541,14 @@ function saveMatchToHistory(isWin) {
     result: isWin ? 'win' : 'lose',
     reward: isWin ? (GAME.nominal * GAME.players).toFixed(2) : 0
   };
-
-  // 3. Добавляем в начало массива (чтобы свежие игры были сверху)
   history.unshift(newMatch);
-
-  // 4. Храним, например, только последние 20 игр, чтобы не забивать память
   if (history.length > 20) history.pop();
-
-  // 5. Сохраняем обратно в браузер
   localStorage.setItem('govno_game_history', JSON.stringify(history));
 }
 
-// ── ОТПРАВКА МАТЧА НА СЕРВЕР ──
 function saveMatchToServer(isWin) {
-  // Получаем ID пользователя из Telegram WebApp
   const userId = tg?.initDataUnsafe?.user?.id || 0;
   const username = tg?.initDataUnsafe?.user?.username || 'anonymous';
-
-  // Данные, которые мы отправляем бэкенду
   const matchData = {
     userId: userId,
     username: username,
@@ -541,27 +557,127 @@ function saveMatchToServer(isWin) {
     players: GAME.players,
     result: isWin ? 'win' : 'lose',
     reward: isWin ? (GAME.nominal * GAME.players).toFixed(2) : '0.00',
-    authData: window.Telegram?.WebApp?.initData // Важно! Передаем строку инициализации для проверки подлинности на сервере
+    authData: window.Telegram?.WebApp?.initData
   };
 
-  // Отправляем POST-запрос на ваш будущий сервер
   fetch('https://your-backend-api.com/api/history/save', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(matchData)
   })
-  .then(response => {
-    if (!response.ok) throw new Error('Ошибка сети');
-    return response.json();
-  })
-  .then(data => {
-    console.log('Игра успешно сохранена на сервере:', data);
-  })
-  .catch(error => {
-    console.error('Не удалось сохранить игру на сервере:', error);
-    // Резервный вариант: если сервер упал, можно временно сохранить в localStorage
-    saveToBackupLocalStorage(matchData);
+  .then(response => { if (!response.ok) throw new Error('Ошибка сети'); return response.json(); })
+  .then(data => { console.log('Игра успешно сохранена на сервере:', data); })
+  .catch(error => { console.error('Не удалось сохранить игру на сервере:', error); });
+}
+
+/**
+ * ИТОГОВЫЙ ГЕНЕРАТОР С УЧЕТОМ ПУСТЫХ ШАРОВ (ВСЕГДА ИГРОКИ * 2)
+ */
+function generateGameBallsMatrix(bet, players) {
+  const HOUSE_EDGE = 0.045; 
+  const totalPool = parseFloat((bet * players).toFixed(2));
+  const weekMonthAllocation = parseFloat((totalPool * HOUSE_EDGE).toFixed(2));
+  const netPrizeBank = parseFloat((totalPool - weekMonthAllocation).toFixed(2));
+  
+  const percentMatrix = {
+    2:  [15.53, 22.93, 61.54],
+    3:  [13.86, 18.75, 22.95, 44.44],
+    4:  [13.03, 14.45, 17.25, 19.37, 35.90],
+    5:  [10.43, 12.27, 14.45, 15.40, 16.77, 30.68],
+    6:  [8.69, 10.26, 11.97, 13.68, 13.95, 14.10, 27.35],
+    7:  [7.45, 8.79, 10.26, 11.72, 12.09, 12.09, 12.69, 24.91],
+    8:  [6.52, 7.69, 8.97, 10.26, 10.59, 10.61, 11.14, 11.14, 23.08],
+    9:  [5.79, 6.84, 7.98, 9.12, 9.40, 9.43, 9.93, 9.93, 9.93, 21.65],
+    10: [5.22, 6.15, 7.18, 8.21, 8.46, 8.52, 8.93, 8.93, 8.93, 8.93, 20.54],
+    11: [4.74, 5.59, 6.53, 7.46, 7.70, 7.74, 8.12, 8.12, 8.12, 8.12, 8.18, 19.58],
+    12: [4.35, 5.17, 5.98, 6.84, 7.04, 7.09, 7.44, 7.44, 7.44, 7.44, 7.47, 7.50, 18.80],
+    13: [4.01, 4.77, 5.52, 6.31, 6.50, 6.55, 6.88, 6.88, 6.88, 6.88, 6.88, 6.88, 6.91, 18.15],
+    14: [3.73, 4.43, 5.14, 5.87, 6.04, 6.09, 6.37, 6.39, 6.40, 6.40, 6.40, 6.40, 6.40, 6.40, 17.58],
+    15: [3.48, 4.14, 4.79, 5.47, 5.64, 5.68, 5.96, 5.96, 5.98, 5.98, 5.98, 5.98, 5.98, 5.98, 5.98, 17.09]
+  };
+
+  const ticketMatrix = {
+    2:  [0, 0, 0, 0],
+    3:  [0, 0, 0, 1],
+    4:  [0, 1, 1, 1],
+    5:  [1, 1, 1, 1],
+    6:  [1, 1, 1, 2],
+    7:  [1, 1, 2, 2],
+    8:  [1, 2, 2, 3],
+    9:  [2, 2, 3, 3],
+    10: [2, 2, 3, 3],
+    11: [2, 3, 3, 3],
+    12: [2, 3, 3, 4],
+    13: [2, 3, 3, 4],
+    14: [3, 3, 4, 4],
+    15: [3, 3, 4, 4]
+  };
+
+  let allBalls = [];
+  let calculatedCoinsSum = 0;
+  let ballIdCounter = 1;
+  const currentPercentages = percentMatrix[players] || [];
+
+  // 1. Монетные шары (Считаем строго от ЧИСТОГО банка)
+  currentPercentages.forEach((percent) => {
+    // ВМЕСТО totalPool умножаем на netPrizeBank
+    let coinValue = parseFloat((netPrizeBank * (percent / 100)).toFixed(2));
+    calculatedCoinsSum += coinValue;
+
+    allBalls.push({
+      id: ballIdCounter++,
+      type: 'coin',
+      coins: coinValue,
+      tickets: 0,
+      percent: percent
+    });
   });
+
+  calculatedCoinsSum = parseFloat(calculatedCoinsSum.toFixed(2));
+  if (calculatedCoinsSum !== netPrizeBank) {
+    const diff = parseFloat((netPrizeBank - calculatedCoinsSum).toFixed(2));
+    allBalls[allBalls.length - 1].coins = parseFloat((allBalls[allBalls.length - 1].coins + diff).toFixed(2));
+  }
+
+  // 2. Билетные шары
+  let ticketsCount = 0;
+  const playerTicketRow = ticketMatrix[players];
+  if (playerTicketRow) {
+    if (bet === 0.5)      ticketsCount = playerTicketRow[0];
+    else if (bet === 1.0) ticketsCount = playerTicketRow[1];
+    else if (bet === 1.5) ticketsCount = playerTicketRow[2];
+    else if (bet === 2.0) ticketsCount = playerTicketRow[3];
+  }
+
+  for (let i = 0; i < ticketsCount; i++) {
+    allBalls.push({
+      id: ballIdCounter++,
+      type: 'ticket',
+      coins: 0.00, 
+      tickets: 1,  
+      percent: 0   
+    });
+  }
+
+  // 3. Заполнение пустотой до Игроки * 2
+  const targetTotalBalls = players * 2;
+  const emptyBallsNeeded = targetTotalBalls - allBalls.length;
+
+  for (let i = 0; i < emptyBallsNeeded; i++) {
+    allBalls.push({
+      id: ballIdCounter++,
+      type: 'empty',
+      coins: 0.00,
+      tickets: 0,
+      percent: 0
+    });
+  }
+
+  return {
+    totalPool: totalPool,
+    netPrizeBank: netPrizeBank,
+    weekMonthAllocation: weekMonthAllocation,
+    totalBallsGenerated: allBalls.length,
+    balls: allBalls
+  };
 }

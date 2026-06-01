@@ -209,3 +209,103 @@ document.addEventListener('DOMContentLoaded', () => {
   // Запуск загрузки истории игр
   loadServerHistory();
 });
+
+function createPoopSplash(event, cardElement) {
+  // Находим иконку унитаза внутри карточки, из которой всё польется
+  const toiletImg = cardElement.querySelector('.lobby-icon img, .lobby-card img, [src*="taz"]');
+  
+  let centerX, centerY;
+  
+  if (toiletImg) {
+    // Если нашли унитаз — берем его координаты относительно карточки
+    const cardRect = cardElement.getBoundingClientRect();
+    const imgRect = toiletImg.getBoundingClientRect();
+    centerX = (imgRect.left - cardRect.left) + (imgRect.width / 2);
+    centerY = (imgRect.top - cardRect.top) + (imgRect.height / 2);
+  } else {
+    // Фолбэк: если не нашли картинку, брызгаем из места клика
+    const rect = cardElement.getBoundingClientRect();
+    centerX = event.clientX - rect.left;
+    centerY = event.clientY - rect.top;
+  }
+
+  const particleCount = 8; // Количество вылетающих брызг
+  const emojis = ['💩', '🟤', '💦']; // Что именно летит (можно оставить только 💩)
+
+  for (let i = 0; i < particleCount; i++) {
+    const particle = document.createElement('div');
+    particle.className = 'poop-splash-particle';
+    
+    // Выбираем случайную текстуру брызг
+    particle.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+    
+    // Считаем случайный угол и дальность разлета
+    const angle = Math.random() * Math.PI * 2; // 360 градусов
+    const distance = 40 + Math.random() * 60;  // Дистанция полета в пикселях
+    
+    const tx = Math.cos(angle) * distance;
+    const ty = Math.sin(angle) * distance - 20; // Немного подкидываем вверх по оси Y
+    const rot = Math.random() * 360; // Случайный поворот в полете
+
+    // Передаем переменные в CSS анимацию
+    particle.style.setProperty('--tx', `${tx}px`);
+    particle.style.setProperty('--ty', `${ty}px`);
+    particle.style.setProperty('--rot', `${rot}deg`);
+
+    // Спивним частицу прямо по центру унитаза
+    particle.style.left = `${centerX - 10}px`; // -10 для центровки по ширине
+    particle.style.top = `${centerY - 10}px`;
+
+    cardElement.appendChild(particle);
+
+    // Удаляем элемент после завершения анимации
+    particle.addEventListener('animationend', () => {
+      particle.remove();
+    });
+  }
+}
+
+function playPoopSplash(event, cardElement) {
+  // Находим элемент унитаза внутри карточки
+  const toiletNode = cardElement.querySelector('.lobby-toilet');
+  if (!toiletNode) return;
+
+  // Рассчитываем центр унитаза для вылета частиц
+  const cardRect = cardElement.getBoundingClientRect();
+  const toiletRect = toiletNode.getBoundingClientRect();
+  
+  const centerX = (toiletRect.left - cardRect.left) + (toiletRect.width / 2);
+  const centerY = (toiletRect.top - cardRect.top) + (toiletRect.height / 2);
+
+  const particleCount = 8; // Сколько какашек вылетает
+  const items = ['💩', '🟤', '💦'];
+
+  for (let i = 0; i < particleCount; i++) {
+    const p = document.createElement('div');
+    p.className = 'poop-splash-particle';
+    p.textContent = items[Math.floor(Math.random() * items.length)];
+
+    // Случайная траектория разлета
+    const angle = Math.random() * Math.PI * 2;
+    const distance = 35 + Math.random() * 55;
+    
+    const tx = Math.cos(angle) * distance;
+    const ty = Math.sin(angle) * distance - 15; // Подкидываем чуть вверх
+    const rot = Math.random() * 360;
+
+    p.style.setProperty('--tx', `${tx}px`);
+    p.style.setProperty('--ty', `${ty}px`);
+    p.style.setProperty('--rot', `${rot}deg`);
+
+    p.style.left = `${centerX - 10}px`;
+    p.style.top = `${centerY - 10}px`;
+
+    cardElement.appendChild(p);
+
+    p.addEventListener('animationend', () => p.remove());
+  }
+
+  // Здесь вызывается твоя стандартная функция перехода/входа в игру
+  // Пример: const nominal = cardElement.getAttribute('data-nominal');
+  // joinLobby(cardElement.querySelector('.join-btn'), nominal);
+}

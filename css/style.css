@@ -719,3 +719,32 @@ body::before {
   filter: brightness(1) saturate(1) drop-shadow(0 0 6px rgba(220,160,0,.5));
 }
 
+/* Контейнер для анимации брызг внутри карточки */
+.lobby-card {
+  position: relative; /* Убедись, что у карточек лобби стоит relative! */
+  overflow: visible !important; /* Чтобы брызги могли вылетать за пределы карточки */
+}
+
+/* Стили для какашек-частиц */
+.poop-splash-particle {
+  position: absolute;
+  pointer-events: none; /* Чтобы частицы не мешали кликам */
+  font-size: 20px; /* Размер брызг */
+  z-index: 999;
+  animation: poopFly 0.6s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+@keyframes poopFly {
+  0% {
+    transform: translate(0, 0) scale(0.3) rotate(0deg);
+    opacity: 1;
+  }
+  80% {
+    opacity: 0.8;
+  }
+  100% {
+    /* Значения динамически подставит JS, это дефолт */
+    transform: translate(var(--tx), var(--ty)) scale(1) rotate(var(--rot));
+    opacity: 0;
+  }
+}
