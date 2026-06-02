@@ -51,9 +51,19 @@
   animation: pulse 1.5s ease-in-out infinite;
 }
 
-@keyframes pulse {
-  0%,100% { transform: scale(1); filter: drop-shadow(0 0 6px rgba(200,150,0,.5)); }
-  50%      { transform: scale(1.08); filter: drop-shadow(0 0 16px rgba(240,180,0,.9)); }
+@keyframes poopGameFly {
+  0% {
+    transform: translate(0, 0) scale(0.3) rotate(0deg);
+    opacity: 1;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    /* Прилетает в верхнюю точку и немного опускается вниз на +15px (эффект падения капель) */
+    transform: translate(var(--tx), calc(var(--ty) + 15px)) scale(1.1) rotate(var(--rot));
+    opacity: 0;
+  }
 }
 
 .loader-title {
@@ -212,77 +222,102 @@
 
 .t-cell {
   border-radius: 9px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 3px;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important; /* Центрирует и унитаз, и номер вместе по центру */
+  gap: 2px !important;                 /* Плотный, аккуратный зазор между унитазом и номером, чтобы они не были далеко */
   border: 1px solid #3a2c18;
   background: #282010;
   cursor: pointer;
   transition: transform .1s, border-color .2s, background .2s;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
-  padding: 3px 3px 5px 3px;
+  padding: 6px 4px 6px 4px !important; /* Одинаковые отступы, чтобы элементы не разъезжались */
   min-height: 0;
   overflow: visible;
+  position: relative !important;
 }
 
 .t-cell .t-img {
   object-fit: contain;
-  width: 60%;
+  width: 55%;                          /* Чуть зажали ширину, чтобы в больших ячейках они не гигантскими */
   height: auto;
   flex-shrink: 0;
-  max-height: 65%;
+  max-height: 60%;
+  margin-top: 0 !important;            /* Убрали старый сдвиг, ломавший центровку */
 }
 
 .t-cell .t-emoji { line-height: 1; }
 
+/* 🌟 БАЗОВЫЙ ЯРКИЙ НОМЕР */
 .t-cell .t-num {
   font-family: var(--font-body);
-  color: #a08050;
+  color: #ffffff !important;           /* Чистый белый сочный цвет */
   line-height: 1;
-  font-size: 11px;
-  font-weight: 700;
-  text-shadow: 0 1px 2px rgba(0,0,0,.8);
+  font-size: 14px !important;          /* Крупный размер */
+  font-weight: 900 !important;          /* Максимально жирный (Black) */
+  
+  /* Плотная черная обводка-тень, чтобы номер горел и не сливался с фоном */
+  text-shadow: 0 0 3px #000000, 
+               0 0 6px #000000,
+               0 1px 3px #000000 !important; 
+  
+  display: block !important;
+  position: static !important;         /* Статичное позиционирование удерживает его прямо под картинкой */
+  transform: none !important;
+  margin: 0 !important;                /* Никаких auto-отступов наверх или вниз */
+  text-align: center !important;
+  width: auto !important;
+  opacity: 1 !important;
+  z-index: 10 !important;
 }
 
-/* Моя ячейка */
+/* Моя ячейка — Яркое золото */
 .t-cell.mine {
   border-color: var(--gold-bright);
   background: #2a2010;
   box-shadow: 0 0 8px rgba(220,160,0,.3);
 }
-.t-cell.mine .t-num { color: var(--gold-bright); }
+.t-cell.mine .t-num { 
+  color: var(--gold-bright) !important; 
+  text-shadow: 0 0 4px #000000, 0 0 8px var(--gold-bright) !important;
+}
 
-/* Выбранная */
-/* Выбранная — фиолетовая акцентовка */
+/* Выбранная — Неоновый Фиолетовый */
 .t-cell.chosen {
   border-color: #9040d0;
   background: #1a0a2a;
   box-shadow: 0 0 12px rgba(140,60,220,.6), inset 0 0 8px rgba(120,40,200,.2);
 }
-.t-cell.chosen .t-num { color: #c080ff; font-weight: 700; }
+.t-cell.chosen .t-num { 
+  color: #dfb5ff !important;           /* Очень яркий светлый фиолетовый */
+  text-shadow: 0 0 4px #000000, 0 0 8px #9040d0 !important;
+}
 
-/* Выигрыш */
+/* Выигрыш — Кислотно-зеленый */
 .t-cell.won {
   border-color: #6a8a28;
   background: #1a2808;
   cursor: default;
   box-shadow: 0 0 8px rgba(100,160,40,.3);
 }
+.t-cell.won .t-num { 
+  color: #b4f04d !important;           /* Сочный салатовый светящийся цвет */
+  text-shadow: 0 0 4px #000000, 0 0 8px #6a8a28 !important;
+}
 
-.t-cell.won .t-num { color: #8ab040; }
-
-/* Проигрыш */
+/* Проигрыш — Огненно-красный */
 .t-cell.lost {
   border-color: #8a2020;
   background: #2a0a0a;
   cursor: default;
   box-shadow: 0 0 8px rgba(180,40,40,.3), inset 0 0 6px rgba(150,20,20,.2);
 }
-
-.t-cell.lost .t-num { color: #a04040; }
+.t-cell.lost .t-num { 
+  color: #ff6666 !important;           /* Яркий сигнал-красный */
+  text-shadow: 0 0 4px #000000, 0 0 8px #8a2020 !important;
+}
 
 /* Чужой ход */
 .t-cell.dim { opacity: .4; cursor: default; }
@@ -692,3 +727,17 @@
   animation: resultPop .5s .2s cubic-bezier(.3,1.6,.5,1) both;
 }
 
+/* Контейнер игровой сетки должен позволять частицам вылетать за её пределы */
+#toiletGrid {
+  position: relative;
+  overflow: visible !important;
+}
+
+/* Стили частиц говна */
+.poop-splash-particle {
+  position: absolute;
+  pointer-events: none;
+  font-size: 24px; /* Чуть увеличили, чтобы в игре было сочнее */
+  z-index: 9999;
+  animation: poopGameFly 0.6s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}

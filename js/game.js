@@ -11,8 +11,8 @@ const params = new URLSearchParams(window.location.search);
 const GAME = {
   id:      1107,
   nominal: parseFloat(params.get('nominal')) || 1,
-  players: parseInt(params.get('players'))   || 10,
-  myIndex: 1,
+  players: Math.min(parseInt(params.get('players')) || 10, 10), // Максимум 10 участников!
+  myIndex: 1, // Твой индекс равен 1 (так как отсчет с 0, то индекс 1 — это второй ходящий)
 };
 
 const PLAYERS = ['@igor','@anna','@max','@you','@kate','@dima','@alex','@mia','@oleg','@lena','@vanya','@sasha','@olga','@ivan','@petr'];
@@ -222,7 +222,7 @@ function pickRandom() {
 // ── СМЫТЬ ──
 function doFlush() {
   if (!state.myTurn || !state.chosen || state.animating) return;
-  stopTimer();  
+  stopTimer();    
   openBall(state.chosen, true);
 }
 
@@ -577,40 +577,26 @@ function generateGameBallsMatrix(bet, players) {
   const HOUSE_EDGE = 0.045; 
   const totalPool = parseFloat((bet * players).toFixed(2));
   const weekMonthAllocation = parseFloat((totalPool * HOUSE_EDGE).toFixed(2));
+  
+  // Расчет строго от Чистого банка
   const netPrizeBank = parseFloat((totalPool - weekMonthAllocation).toFixed(2));
   
+  // Процентная сетка призов (до 10 игроков включительно)
   const percentMatrix = {
     2:  [15.53, 22.93, 61.54],
     3:  [13.86, 18.75, 22.95, 44.44],
     4:  [13.03, 14.45, 17.25, 19.37, 35.90],
-    5:  [10.43, 12.27, 14.45, 15.40, 16.77, 30.68],
+    5:  [10.43, 12.25, 14.38, 15.40, 16.77, 30.77],
     6:  [8.69, 10.26, 11.97, 13.68, 13.95, 14.10, 27.35],
     7:  [7.45, 8.79, 10.26, 11.72, 12.09, 12.09, 12.69, 24.91],
     8:  [6.52, 7.69, 8.97, 10.26, 10.59, 10.61, 11.14, 11.14, 23.08],
     9:  [5.79, 6.84, 7.98, 9.12, 9.40, 9.43, 9.93, 9.93, 9.93, 21.65],
-    10: [5.22, 6.15, 7.18, 8.21, 8.46, 8.52, 8.93, 8.93, 8.93, 8.93, 20.54],
-    11: [4.74, 5.59, 6.53, 7.46, 7.70, 7.74, 8.12, 8.12, 8.12, 8.12, 8.18, 19.58],
-    12: [4.35, 5.17, 5.98, 6.84, 7.04, 7.09, 7.44, 7.44, 7.44, 7.44, 7.47, 7.50, 18.80],
-    13: [4.01, 4.77, 5.52, 6.31, 6.50, 6.55, 6.88, 6.88, 6.88, 6.88, 6.88, 6.88, 6.91, 18.15],
-    14: [3.73, 4.43, 5.14, 5.87, 6.04, 6.09, 6.37, 6.39, 6.40, 6.40, 6.40, 6.40, 6.40, 6.40, 17.58],
-    15: [3.48, 4.14, 4.79, 5.47, 5.64, 5.68, 5.96, 5.96, 5.98, 5.98, 5.98, 5.98, 5.98, 5.98, 5.98, 17.09]
+    10: [5.22, 6.15, 7.18, 8.21, 8.46, 8.52, 8.93, 8.93, 8.93, 8.93, 20.54]
   };
 
-  const ticketMatrix = {
-    2:  [0, 0, 0, 0],
-    3:  [0, 0, 0, 1],
-    4:  [0, 1, 1, 1],
-    5:  [1, 1, 1, 1],
-    6:  [1, 1, 1, 2],
-    7:  [1, 1, 2, 2],
-    8:  [1, 2, 2, 3],
-    9:  [2, 2, 3, 3],
-    10: [2, 2, 3, 3],
-    11: [2, 3, 3, 3],
-    12: [2, 3, 3, 4],
-    13: [2, 3, 3, 4],
-    14: [3, 3, 4, 4],
-    15: [3, 3, 4, 4]
+  // Твоя НОВАЯ сетка вместимости лобби (максимум ограничено 10 игроками)
+  const totalToiletsMatrix = {
+    2: 5,  3: 7,  4: 9,  5: 12, 6: 14, 7: 16, 8: 19, 9: 21, 10: 23
   };
 
   let allBalls = [];
@@ -618,66 +604,97 @@ function generateGameBallsMatrix(bet, players) {
   let ballIdCounter = 1;
   const currentPercentages = percentMatrix[players] || [];
 
-  // 1. Монетные шары (Считаем строго от ЧИСТОГО банка)
+  // ШАГ 1: Наполнение монетами (Расчет от Чистого Банка)
   currentPercentages.forEach((percent) => {
-    // ВМЕСТО totalPool умножаем на netPrizeBank
     let coinValue = parseFloat((netPrizeBank * (percent / 100)).toFixed(2));
     calculatedCoinsSum += coinValue;
-
-    allBalls.push({
-      id: ballIdCounter++,
-      type: 'coin',
-      coins: coinValue,
-      tickets: 0,
-      percent: percent
-    });
+    allBalls.push({ id: ballIdCounter++, type: 'coin', coins: coinValue, tickets: 0 });
   });
 
+  // Корректировка округления по последнему шару
   calculatedCoinsSum = parseFloat(calculatedCoinsSum.toFixed(2));
-  if (calculatedCoinsSum !== netPrizeBank) {
+  if (calculatedCoinsSum !== netPrizeBank && allBalls.length > 0) {
     const diff = parseFloat((netPrizeBank - calculatedCoinsSum).toFixed(2));
     allBalls[allBalls.length - 1].coins = parseFloat((allBalls[allBalls.length - 1].coins + diff).toFixed(2));
   }
 
-  // 2. Билетные шары
+  // ШАГ 2: Новая логика распределения билетов по твоим условиям
   let ticketsCount = 0;
-  const playerTicketRow = ticketMatrix[players];
-  if (playerTicketRow) {
-    if (bet === 0.5)      ticketsCount = playerTicketRow[0];
-    else if (bet === 1.0) ticketsCount = playerTicketRow[1];
-    else if (bet === 1.5) ticketsCount = playerTicketRow[2];
-    else if (bet === 2.0) ticketsCount = playerTicketRow[3];
+  if (bet === 0.5) {
+    if (players >= 5 && players <= 8)       ticketsCount = 1;
+    else if (players >= 9 && players <= 10)  ticketsCount = 2; 
+  } else if (bet === 1.0 || bet === 1.5) { 
+    if (players >= 4 && players <= 7)       ticketsCount = 1;
+    else if (players >= 8 && players <= 10)  ticketsCount = 2;
+  } else if (bet === 2.0) {
+    if (players >= 2 && players <= 5)       ticketsCount = 1;
+    else if (players >= 6 && players <= 9)       ticketsCount = 2;
+    else if (players === 10)                 ticketsCount = 3;
   }
 
+  // Добавляем билеты в пул
   for (let i = 0; i < ticketsCount; i++) {
-    allBalls.push({
-      id: ballIdCounter++,
-      type: 'ticket',
-      coins: 0.00, 
-      tickets: 1,  
-      percent: 0   
-    });
+    allBalls.push({ id: ballIdCounter++, type: 'ticket', coins: 0, tickets: 1 });
   }
 
-  // 3. Заполнение пустотой до Игроки * 2
-  const targetTotalBalls = players * 2;
+  // ШАГ 3: Заполнение пустышками (мухами) до новой нормы унитазов
+  const targetTotalBalls = totalToiletsMatrix[players] || 10;
   const emptyBallsNeeded = targetTotalBalls - allBalls.length;
-
   for (let i = 0; i < emptyBallsNeeded; i++) {
-    allBalls.push({
-      id: ballIdCounter++,
-      type: 'empty',
-      coins: 0.00,
-      tickets: 0,
-      percent: 0
-    });
+    allBalls.push({ id: ballIdCounter++, type: 'empty', coins: 0, tickets: 0 });
   }
 
   return {
-    totalPool: totalPool,
     netPrizeBank: netPrizeBank,
-    weekMonthAllocation: weekMonthAllocation,
     totalBallsGenerated: allBalls.length,
     balls: allBalls
   };
+}
+
+function triggerGamePoopSplash(cellNum) {
+  // Находим ячейку унитаза, которую выбрал игрок
+  const cell = document.getElementById(`cell-${cellNum}`);
+  if (!cell) return;
+
+  // Рассчитываем координаты центра ячейки относительно всей сетки
+  const grid = document.getElementById('toiletGrid');
+  const gridRect = grid.getBoundingClientRect();
+  const cellRect = cell.getBoundingClientRect();
+
+  // Вычисляем точку «взрыва» ровно по центру выбранного унитаза
+  const centerX = (cellRect.left - gridRect.left) + (cellRect.width / 2);
+  const centerY = (cellRect.top - gridRect.top) + (cellRect.height / 2);
+
+  const particleCount = 10; // Количество частиц в фонтане
+  const elements = ['💩', '🟤', '💦', '🪰']; 
+
+  for (let i = 0; i < particleCount; i++) {
+    const p = document.createElement('div');
+    p.className = 'poop-splash-particle';
+    p.textContent = elements[Math.floor(Math.random() * elements.length)];
+
+    // 🎯 НАПРАВЛЯЕМ ВВЕРХ: Угол зажат от -60° до -120° (в тригонометрии JS это строго вверх)
+    const angle = -Math.PI / 3 - Math.random() * (Math.PI / 3); 
+    
+    // Дистанция вылета вверх (высота фонтана)
+    const distance = 40 + Math.random() * 50;  
+    
+    // Считаем чистую траекторию полета
+    const tx = Math.cos(angle) * (distance * 0.5); // Небольшой разлет в бока
+    const ty = Math.sin(angle) * distance;         // Мощный рывок строго вверх
+    const rot = (Math.random() - 0.5) * 180;       // Случайное вращение для реализма
+
+    // Передаем координаты анимации в CSS
+    p.style.setProperty('--tx', `${tx}px`);
+    p.style.setProperty('--ty', `${ty}px`);
+    p.style.setProperty('--rot', `${rot}deg`);
+
+    // Спавним частицу в центре унитаза
+    p.style.left = `${centerX - 12}px`; 
+    p.style.top = `${centerY - 12}px`;
+
+    grid.appendChild(p);
+
+    p.addEventListener('animationend', () => p.remove());
+  }
 }

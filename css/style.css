@@ -42,6 +42,12 @@ html, body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* ── СИСТЕМНОЕ СКРЫТИЕ ЭКРАНОВ СЕКЦИЙ ── */
+.screen-section.hidden,
+.screen-section.hidden * {
+  display: none !important;
+}
+
 /* ── ТЕКСТУРА ФОНА ── */
 body::before {
   content: '';
@@ -392,7 +398,7 @@ body::before {
   border-radius: 10px;
   padding: 10px 12px;
   position: relative;
-  overflow: hidden;
+  overflow: visible !important; /* Важно: чтобы брызги вылетали наружу карточки */
   transition: border-color .2s, box-shadow .2s;
   animation: cardIn .4s ease both;
 }
@@ -719,12 +725,6 @@ body::before {
   filter: brightness(1) saturate(1) drop-shadow(0 0 6px rgba(220,160,0,.5));
 }
 
-/* Контейнер для анимации брызг внутри карточки */
-.lobby-card {
-  position: relative; /* Убедись, что у карточек лобби стоит relative! */
-  overflow: visible !important; /* Чтобы брызги могли вылетать за пределы карточки */
-}
-
 /* Стили для какашек-частиц */
 .poop-splash-particle {
   position: absolute;
@@ -743,7 +743,6 @@ body::before {
     opacity: 0.8;
   }
   100% {
-    /* Значения динамически подставит JS, это дефолт */
     transform: translate(var(--tx), var(--ty)) scale(1) rotate(var(--rot));
     opacity: 0;
   }

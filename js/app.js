@@ -82,12 +82,52 @@ function highlightWallet() {
   }, 1500);
 }
 
-// ── Переключение вкладок ──
+// ── 🗺️ ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК (БЕЗ КОДА КАРТЫ ВНУТРИ) ──
+// ── 🗺️ ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК (ОПТИМИЗИРОВАННОЕ ПОД LEAFLET) ──
 function switchTab(btn, tab) {  
+  // Убираем активное состояние со всех кнопок навигации
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
 
-  if (tab !== 'home') {
+  // Скрываем абсолютно все экраны-секции
+  document.querySelectorAll('.screen-section').forEach(screen => screen.classList.add('hidden'));
+
+  if (tab === 'home') {
+    // Включаем главный экран с лобби
+    document.getElementById('screenHome').classList.remove('hidden');
+  } 
+  else if (tab === 'map') {
+    // Включаем экран интерактивной карты
+    const mapScreen = document.getElementById('screenMap');
+    if (mapScreen) {
+      mapScreen.classList.remove('hidden');
+    }
+    
+    // Безопасно вызываем инициализацию из maps.js
+    if (typeof initGlobalMap === 'function') {
+      // Инициализируем карту, если она еще не создана
+      initGlobalMap();
+    }
+
+    // КРИТИЧЕСКИЙ ФИКС ДЛЯ LEAFLET:
+    // Даем браузеру 150 миллисекунд, чтобы отрисовать блок #screenMap на экране,
+    // после чего принудительно заставляем карту обновить свои внутренние размеры.
+    setTimeout(() => {
+      // Проверяем наличие карты в глобальной области видимости window
+      const globalMapInstance = window.myLeafletMap || window.map;
+      
+      if (globalMapInstance && typeof globalMapInstance.invalidateSize === 'function') {
+        globalMapInstance.invalidateSize();
+      } else {
+        // Если карта уже существует внутри замыкания maps.js, попробуем 
+        // стриггерить системное событие изменения размера окна, которое Leaflet перехватит сам
+        window.dispatchEvent(new Event('resize'));
+      }
+    }, 150);
+  } 
+  else {
+    // Для всех остальных нереализованных вкладок (Рейтинг, Билеты)
+    document.getElementById('screenHome').classList.remove('hidden'); // Оставляем на главной
     showToast('🚧 Раздел в разработке...');
   }
 
@@ -102,7 +142,7 @@ function startLobbyTimers() {
 
   setInterval(() => {
     if (seconds <= 0) {
-      seconds = 10 * 60; // Перезапуск на 10 минут, если таймер дошел до конца
+      seconds = 10 * 60; // Перезапуск на 10 минут
     } else {
       seconds--;
     }
@@ -134,14 +174,12 @@ function loadServerHistory() {
   const container = document.getElementById('historyContainer');
   if (!container) return;
 
-  // Имитируем массив данных от бэкенда
   const mockServerData = [
     { gameId: 1109, nominal: 2.0, players: 10, result: 'lose', createdAt: new Date() },
     { gameId: 1108, nominal: 0.5, players: 2,  result: 'win',  reward: '1.00', createdAt: new Date(Date.now() - 3600000) },
     { gameId: 1105, nominal: 1.0, players: 5,  result: 'win',  reward: '5.00', createdAt: new Date(Date.now() - 86400000) }
   ];
 
-  // Имитируем задержку сети 800мс
   setTimeout(() => {
     container.innerHTML = ''; 
 
@@ -150,7 +188,6 @@ function loadServerHistory() {
       return;
     }
 
-    // Рендерим карточки
     container.innerHTML = mockServerData.map(match => {
       const isWin = match.result === 'win';
       const badgeColor = isWin ? '#2a6020' : '#8b4513';
@@ -210,74 +247,60 @@ document.addEventListener('DOMContentLoaded', () => {
   loadServerHistory();
 });
 
+// ── Анимации всплесков частиц какашек ──
 function createPoopSplash(event, cardElement) {
-  // Находим иконку унитаза внутри карточки, из которой всё польется
   const toiletImg = cardElement.querySelector('.lobby-icon img, .lobby-card img, [src*="taz"]');
-  
   let centerX, centerY;
   
   if (toiletImg) {
-    // Если нашли унитаз — берем его координаты относительно карточки
     const cardRect = cardElement.getBoundingClientRect();
     const imgRect = toiletImg.getBoundingClientRect();
     centerX = (imgRect.left - cardRect.left) + (imgRect.width / 2);
     centerY = (imgRect.top - cardRect.top) + (imgRect.height / 2);
   } else {
-    // Фолбэк: если не нашли картинку, брызгаем из места клика
     const rect = cardElement.getBoundingClientRect();
     centerX = event.clientX - rect.left;
     centerY = event.clientY - rect.top;
   }
 
-  const particleCount = 8; // Количество вылетающих брызг
-  const emojis = ['💩', '🟤', '💦']; // Что именно летит (можно оставить только 💩)
+  const particleCount = 8; 
+  const emojis = ['💩', '🟤', '💦']; 
 
   for (let i = 0; i < particleCount; i++) {
     const particle = document.createElement('div');
     particle.className = 'poop-splash-particle';
-    
-    // Выбираем случайную текстуру брызг
     particle.textContent = emojis[Math.floor(Math.random() * emojis.length)];
     
-    // Считаем случайный угол и дальность разлета
-    const angle = Math.random() * Math.PI * 2; // 360 градусов
-    const distance = 40 + Math.random() * 60;  // Дистанция полета в пикселях
+    const angle = Math.random() * Math.PI * 2; 
+    const distance = 40 + Math.random() * 60;  
     
     const tx = Math.cos(angle) * distance;
-    const ty = Math.sin(angle) * distance - 20; // Немного подкидываем вверх по оси Y
-    const rot = Math.random() * 360; // Случайный поворот в полете
+    const ty = Math.sin(angle) * distance - 20; 
+    const rot = Math.random() * 360; 
 
-    // Передаем переменные в CSS анимацию
     particle.style.setProperty('--tx', `${tx}px`);
     particle.style.setProperty('--ty', `${ty}px`);
     particle.style.setProperty('--rot', `${rot}deg`);
 
-    // Спивним частицу прямо по центру унитаза
-    particle.style.left = `${centerX - 10}px`; // -10 для центровки по ширине
+    particle.style.left = `${centerX - 10}px`;
     particle.style.top = `${centerY - 10}px`;
 
     cardElement.appendChild(particle);
-
-    // Удаляем элемент после завершения анимации
-    particle.addEventListener('animationend', () => {
-      particle.remove();
-    });
+    particle.addEventListener('animationend', () => particle.remove());
   }
 }
 
 function playPoopSplash(event, cardElement) {
-  // Находим элемент унитаза внутри карточки
   const toiletNode = cardElement.querySelector('.lobby-toilet');
   if (!toiletNode) return;
 
-  // Рассчитываем центр унитаза для вылета частиц
   const cardRect = cardElement.getBoundingClientRect();
   const toiletRect = toiletNode.getBoundingClientRect();
   
   const centerX = (toiletRect.left - cardRect.left) + (toiletRect.width / 2);
   const centerY = (toiletRect.top - cardRect.top) + (toiletRect.height / 2);
 
-  const particleCount = 8; // Сколько какашек вылетает
+  const particleCount = 8; 
   const items = ['💩', '🟤', '💦'];
 
   for (let i = 0; i < particleCount; i++) {
@@ -285,12 +308,11 @@ function playPoopSplash(event, cardElement) {
     p.className = 'poop-splash-particle';
     p.textContent = items[Math.floor(Math.random() * items.length)];
 
-    // Случайная траектория разлета
     const angle = Math.random() * Math.PI * 2;
     const distance = 35 + Math.random() * 55;
     
     const tx = Math.cos(angle) * distance;
-    const ty = Math.sin(angle) * distance - 15; // Подкидываем чуть вверх
+    const ty = Math.sin(angle) * distance - 15; 
     const rot = Math.random() * 360;
 
     p.style.setProperty('--tx', `${tx}px`);
@@ -301,11 +323,6 @@ function playPoopSplash(event, cardElement) {
     p.style.top = `${centerY - 10}px`;
 
     cardElement.appendChild(p);
-
     p.addEventListener('animationend', () => p.remove());
   }
-
-  // Здесь вызывается твоя стандартная функция перехода/входа в игру
-  // Пример: const nominal = cardElement.getAttribute('data-nominal');
-  // joinLobby(cardElement.querySelector('.join-btn'), nominal);
 }
