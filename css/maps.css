@@ -1,47 +1,51 @@
 /* ==========================================================================
-   GOVNO ne TONet — maps.css (Глобальная редакция — Финал)
-   Стили для интерактивной карты мира Leaflet и динамических кабин
+   GOVNO ne TONet — maps.css (Исправленная версия)
    ========================================================================== */
 
-/* Контейнер экрана карты (секция) */
+/* ── ЭКРАН КАРТЫ ── */
 #mapScreen {
-  position: absolute;
+  position: fixed;
   top: var(--header-h, 74px);
   bottom: var(--nav-h, 60px);
   left: 0;
   right: 0;
   width: 100%;
-  height: auto;
+  /* height НЕ задаём — растягивается между top и bottom */
   z-index: 10;
-  /* Защита от сбоев Leaflet: принудительная микро-анимация перерисовки */
-  animation: mapScreenInit 0.1s ease forwards;
+  display: block;
 }
 
-@keyframes mapScreenInit {
-  from { opacity: 0.99; }
-  to { opacity: 1; }
+/* Скрытие через класс */
+#mapScreen.hidden {
+  display: none !important;
 }
 
-/* Надежная обертка для обрезки и позиционирования поля карты */
+/* Safe area для iPhone */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  #mapScreen {
+    bottom: calc(var(--nav-h, 60px) + env(safe-area-inset-bottom));
+  }
+}
+
+/* ── ОБЁРТКА КАРТЫ ── */
 .map-wrapper {
   position: relative;
   width: 100%;
-  height: 100%; 
+  height: 100%; /* 100% от #mapScreen, не 100vh */
   overflow: hidden;
-  background: #0b0d10; /* Темный фон-заглушка на случай медленного интернета */
+  background: #0b0d10;
 }
 
-/* Сама карта Leaflet, развернутая на всю доступную область */
+/* ── КОНТЕЙНЕР LEAFLET ── */
 #mapContainer {
   width: 100%;
   height: 100%;
   position: relative;
   z-index: 1;
+  overflow: hidden;
 }
 
-/* ── ВЕРХНЯЯ ПЛАШКА-ПОДСКАЗКА НАД КАРТОЙ ── */
-
-/* Обертка для подсказки, гарантирующая её точное центрирование над картой */
+/* ── ПЛАШКА-ПОДСКАЗКА ── */
 .map-overlay-container {
   position: absolute;
   top: 16px;
@@ -49,17 +53,16 @@
   width: 100%;
   display: flex;
   justify-content: center;
-  pointer-events: none; /* Клики свободно проходят сквозь обертку */
-  z-index: 9999;        /* Поверх всех слоев Leaflet */
+  pointer-events: none;
+  z-index: 9999;
 }
 
-/* Всплывающая плашка-подсказка */
 .map-overlay-info {
-  background: linear-gradient(135deg, rgba(26, 20, 10, 0.95) 0%, rgba(18, 13, 4, 0.98) 100%);
+  background: linear-gradient(135deg, rgba(26,20,10,0.95) 0%, rgba(18,13,4,0.98) 100%);
   border: 1.5px solid var(--border-gold, #8a6c28);
   padding: 8px 18px;
   border-radius: 20px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.85), inset 0 0 10px rgba(138, 108, 40, 0.2);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.85), inset 0 0 10px rgba(138,108,40,0.2);
   transform: translateY(-5px);
   animation: overlaySlideIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
@@ -76,73 +79,81 @@
   letter-spacing: 1px;
   text-transform: uppercase;
   white-space: nowrap;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+  text-shadow: 0 1px 3px rgba(0,0,0,0.8);
 }
 
-
-/* ── ⚡ НОВАЯ СИСТЕМА ДИНАМИЧЕСКИХ ОБЪЕКТОВ (JS-Масштабирование) ── */
-
-/* Полный сброс дефолтных рамок и жестких пикселей Leaflet */
+/* ── ДИНАМИЧЕСКИЕ ОБЪЕКТЫ ── */
 .zoomable-cabin-icon {
   background: none !important;
   border: none !important;
 }
 
-/* Контейнер иконки объекта с абсолютным центрированием на карте */
 .cabin-icon-wrapper {
   position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%); /* Идеальное центрирование точки по координатам */
+  transform: translate(-50%, -50%);
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 26px;  /* Дефолтный стартовый размер */
+  width: 26px;
   height: 26px;
-  transition: width 0.15s ease-out, height 0.15s ease-out; /* Плавное изменение размеров */
+  transition: width 0.15s ease-out, height 0.15s ease-out;
 }
 
-/* Сама картинка кабинки (унитаза) */
 .cabin-icon-wrapper .cabin-img {
   width: 100%;
   height: 100%;
   display: block;
   object-fit: contain;
-  filter: drop-shadow(0px 4px 6px rgba(0, 0, 0, 0.9)) drop-shadow(0px 0px 8px rgba(232, 192, 64, 0.3));
+  filter: drop-shadow(0px 4px 6px rgba(0,0,0,0.9)) drop-shadow(0px 0px 8px rgba(232,192,64,0.3));
   transform-origin: center center;
   animation: cabinDrop 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.35) forwards;
+  transition: all 0.3s ease;
 }
 
-/* Эффектное сочное падение объекта на карту при строительстве */
 @keyframes cabinDrop {
-  0% { 
-    transform: scale(0.3); 
-    opacity: 0; 
-  }
-  60% {
-    transform: scale(1.1);
-  }
-  100% { 
-    transform: scale(1); 
-    opacity: 1; 
-  }
+  0%   { transform: scale(0.3); opacity: 0; }
+  60%  { transform: scale(1.1); }
+  100% { transform: scale(1); opacity: 1; }
 }
 
-/* Динамический значок короны/молнии поверх кабинки */
 .cabin-icon-wrapper .cabin-badge {
   position: absolute;
   top: -20%;
   right: -20%;
-  font-size: 11px; /* Начальный размер, далее им управляет JS */
+  font-size: 11px;
   filter: drop-shadow(0 2px 4px rgba(0,0,0,0.8));
   pointer-events: none;
   transition: font-size 0.15s ease-out;
 }
 
+/* ── РЕЖИМ ТОЧКИ (маленький зум) ── */
+.size-dot .cabin-img {
+  display: none !important;
+}
 
-/* ── ⏱️ НАСТРОЙКА ТАЙМЕРА СТРОГО ПОД ОБЪЕКТОМ ── */
+.size-dot {
+  width: 8px !important;
+  height: 8px !important;
+  background: #e8a030 !important;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.3);
+  box-shadow: 0 0 4px rgba(0,0,0,0.5);
+}
 
-/* По умолчанию прячем плашки-таймеры (когда зум карты слишком высоко) */
+/* ── РЕЖИМ ПОЛНОГО ОБЪЕКТА ── */
+.size-full .cabin-img {
+  display: block !important;
+  width: 40px !important;
+  height: 40px !important;
+}
+
+.size-full {
+  background: none !important;
+}
+
+/* ── ТАЙМЕРЫ ── */
 .custom-map-tooltip {
   display: none !important;
   background: none !important;
@@ -150,18 +161,16 @@
   box-shadow: none !important;
 }
 
-/* Автоматически показываем таймеры при приближении (добавлении JS-класса) */
 .show-map-timers .custom-map-tooltip {
   display: block !important;
   background: linear-gradient(135deg, #2a1a08 0%, #170f05 100%) !important;
   border: 1px solid #c8a050 !important;
   border-radius: 6px !important;
   padding: 2px 6px !important;
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.6) !important;
-  opacity: 1 !important; /* Убираем стандартную прозрачность Leaflet */
+  box-shadow: 0 3px 8px rgba(0,0,0,0.6) !important;
+  opacity: 1 !important;
 }
 
-/* Стилизация шрифта секунд внутри плашки */
 .inline-map-timer {
   color: #ffe060;
   font-size: 11px;
@@ -170,36 +179,22 @@
   text-align: center;
 }
 
-/* Полностью вырезаем дефолтную стрелочку Leaflet, чтобы плашка была аккуратной */
 .custom-map-tooltip::before {
   display: none !important;
 }
 
-
-/* ── СТРАХОВКА ДЛЯ АДАПТИВНОСТИ И ШРИФТОВ LEAFLET ── */
-
-/* Отключаем серые контуры Leaflet при фокусе на мобилках */
+/* ── LEAFLET БАЗОВЫЕ ИСПРАВЛЕНИЯ ── */
 .leaflet-container {
   outline: 0 !important;
   font-family: inherit !important;
-  font-size: 14px !important;
-  font-weight: bold !important;
-  text-shadow: 0 0 3px rgba(0,0,0,0.6);
+  background: #0b0d10;
 }
 
-/* Убираем дефолтную белую тень маркеров Leaflet, ломающую прозрачность */
 .leaflet-marker-shadow {
   display: none !important;
 }
 
-/* Принудительный контраст названий улиц для легкого чтения */
-#mapContainer {
-  overflow: hidden; /* Обрезает серые края от масштабирования */
-}
-
-/* ── ИНТЕРФЕЙСНЫЕ КНОПКИ ПОВЕРХ КАРТЫ ── */
-
-/* Кнопка переключения темы на карте */
+/* ── КНОПКА ТЕМЫ ── */
 .map-theme-toggle {
   position: absolute;
   bottom: 20px;
@@ -215,7 +210,7 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.5);
   z-index: 9999;
   transition: transform 0.2s ease, background 0.2s ease;
   -webkit-tap-highlight-color: transparent;
@@ -226,7 +221,7 @@
   background: #2a2010;
 }
 
-/* Боковая панель магазина объектов */
+/* ── БОКОВАЯ ПАНЕЛЬ МАГАЗИНА ── */
 .map-shop-sidebar {
   position: absolute;
   top: 50%;
@@ -238,7 +233,6 @@
   z-index: 9999;
 }
 
-/* Карточка объекта в магазине */
 .shop-item {
   width: 60px;
   height: 65px;
@@ -270,58 +264,12 @@
   transform: scale(0.92);
 }
 
-/* Подсветка выбранного в данный момент объекта */
 .shop-item.active-build {
   border-color: #ffe060;
   background: linear-gradient(135deg, #423015 0%, #221605 100%);
-  box-shadow: 0 0 12px rgba(255, 224, 96, 0.4);
+  box-shadow: 0 0 12px rgba(255,224,96,0.4);
 }
 
 .shop-item.active-build .shop-name {
   color: #ffe060;
-}
-
-/* ⚡ ПРИНУДИТЕЛЬНОЕ УВЕЛИЧЕНИЕ ШРИФТА НАЗВАНИЙ */
-#mapContainer .leaflet-tile {
-  filter: contrast(1.05);
-  image-rendering: auto;
-}
-
-/* Масштаб через zoom — не ломает систему координат Leaflet */
-.leaflet-tile-pane {
-  zoom: 1.2;
-}
-
-/* Специфический CSS для названий городов/улиц в OSM */
-.leaflet-marker-icon, .leaflet-div-icon {
-  font-size: 16px !important;
-  font-weight: 700 !important;
-}
-
-/* Базовое состояние картинки */
-.cabin-icon-wrapper .cabin-img {
-    transition: all 0.3s ease;
-}
-
-/* ── РЕЖИМ ТОЧКИ ── */
-.size-dot .cabin-img {
-    display: none !important; /* Прячем картинку кабинки */
-}
-
-/* Создаем точку через псевдоэлемент или фон контейнера */
-.size-dot {
-    background: #5c4a35 !important;
-    border-radius: 50%;
-    border: 1px solid rgba(255,255,255,0.2);
-    box-shadow: 0 0 4px rgba(0,0,0,0.5);
-}
-
-/* ── РЕЖИМ ПОЛНОГО ОБЪЕКТА ── */
-.size-full .cabin-img {
-    display: block !important;
-    filter: drop-shadow(0px 4px 6px rgba(0, 0, 0, 0.9));
-}
-
-.size-full {
-    background: none !important; /* Убираем фон точки */
 }

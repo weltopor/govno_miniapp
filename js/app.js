@@ -3,6 +3,31 @@
    Telegram Mini App логика (Оптимизированная)
 ═══════════════════════════════════════════ */
 
+// ── ТЕМА ──
+function setTheme(t) {
+  document.body.setAttribute('data-theme', t);
+  localStorage.setItem('theme', t);
+  document.querySelectorAll('.theme-opt').forEach(b =>
+    b.classList.toggle('active', b.getAttribute('onclick').includes(t))
+  );
+}
+
+// Восстановить тему из localStorage
+const savedTheme = localStorage.getItem('theme');
+if (savedTheme) setTheme(savedTheme);
+
+// ── КОШЕЛЁК (новая функция взамен click-listener) ──
+function connectWallet() {
+  if (walletConnected) { showToast('💰 Кошелёк уже подключён'); return; }
+  showToast('🔗 Подключаем TON-кошелёк...');
+  setTimeout(() => {
+    walletConnected = true;
+    const wBtn = document.getElementById('walletBadge');
+    if (wBtn) wBtn.textContent = '✅ UQAb...f3Kp';
+    showToast('✅ Кошелёк подключён!');
+  }, 1200);
+}
+
 // ── Инициализация Telegram WebApp ──
 const tg = window.Telegram?.WebApp;
 if (tg) {
@@ -34,7 +59,7 @@ function joinLobby(btn, nominal) {
     document.getElementById('walletShort').textContent = 'TEST...wallet';
   }
 
-  const card = btn.closest('.lobby-card');
+  const card = btn.closest('.lobby-card-new') || btn.closest('.lobby-card');
   const alreadyJoined = card.classList.contains('joined');
 
   if (alreadyJoined) {
@@ -51,10 +76,12 @@ function joinLobby(btn, nominal) {
   // Обновляем слот (UI-заглушка)
   const filled = card.querySelector('.slots-filled');
   const bar    = card.querySelector('.slots-fill');
-  const cur    = parseInt(filled.textContent);
-  const next   = Math.min(cur + 1, 10);
-  filled.textContent = next;
-  bar.style.width = (next * 10) + '%';
+  if (filled) {
+    const cur  = parseInt(filled.textContent) || 0;
+    const next = Math.min(cur + 1, 10);
+    filled.textContent = next;
+    if (bar) bar.style.width = (next * 10) + '%';
+  }
 
   showToast(`✅ Вошёл в заявку на ${nominal} GOVNO!`);
 
@@ -82,57 +109,58 @@ function highlightWallet() {
   }, 1500);
 }
 
-// ── 🗺️ ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК (БЕЗ КОДА КАРТЫ ВНУТРИ) ──
-// ── 🗺️ ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК (ОПТИМИЗИРОВАННОЕ ПОД LEAFLET) ──
-function switchTab(btn, tab) {  
-  // Убираем активное состояние со всех кнопок навигации
+function switchTab(btn, tab) {
+  // 1. Убираем класс у кнопок
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
 
-  // Скрываем абсолютно все экраны-секции
-  document.querySelectorAll('.screen-section').forEach(screen => screen.classList.add('hidden'));
+  // 2. БЕЗОПАСНО скрываем экраны
+  document.querySelectorAll('.screen-section').forEach(screen => {
+      if (screen) screen.classList.add('hidden');
+  });
 
-  if (tab === 'home') {
-    // Включаем главный экран с лобби
-    document.getElementById('screenHome').classList.remove('hidden');
-  } 
+  // 3. Показываем нужный экран с проверкой
+  const screenMap = {
+    home:      'screenHome',
+    map:       'mapScreen',
+    locations: 'screenLocations',
+    tickets:   'screenTickets',
+  };
+  document.querySelectorAll('.screen-section').forEach(s => s.classList.add('hidden'));
+  const target = document.getElementById(screenMap[tab]);
+  if (target) target.classList.remove('hidden');
+  if (tab === 'map' && typeof initMap === 'function') initMap();
   else if (tab === 'map') {
-    // Включаем экран интерактивной карты
-    const mapScreen = document.getElementById('screenMap');
+    const mapScreen = document.getElementById('mapScreen');
     if (mapScreen) {
       mapScreen.classList.remove('hidden');
-    }
-    
-    // Безопасно вызываем инициализацию из maps.js
-    if (typeof initGlobalMap === 'function') {
-      // Инициализируем карту, если она еще не создана
-      initGlobalMap();
-    }
-
-    // КРИТИЧЕСКИЙ ФИКС ДЛЯ LEAFLET:
-    // Даем браузеру 150 миллисекунд, чтобы отрисовать блок #screenMap на экране,
-    // после чего принудительно заставляем карту обновить свои внутренние размеры.
-    setTimeout(() => {
-      // Проверяем наличие карты в глобальной области видимости window
-      const globalMapInstance = window.myLeafletMap || window.map;
       
-      if (globalMapInstance && typeof globalMapInstance.invalidateSize === 'function') {
-        globalMapInstance.invalidateSize();
-      } else {
-        // Если карта уже существует внутри замыкания maps.js, попробуем 
-        // стриггерить системное событие изменения размера окна, которое Leaflet перехватит сам
-        window.dispatchEvent(new Event('resize'));
-      }
-    }, 150);
-  } 
-  else {
-    // Для всех остальных нереализованных вкладок (Рейтинг, Билеты)
-    document.getElementById('screenHome').classList.remove('hidden'); // Оставляем на главной
-    showToast('🚧 Раздел в разработке...');
+      // 1. Сначала инициализируем
+      if (typeof initGlobalMap === 'function') initGlobalMap();
+      
+      // 2. Двойная проверка: сначала даем браузеру отрисовать, потом обновляем Leaflet
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          if (window.myLeafletMap) {
+            window.myLeafletMap.invalidateSize(true); // true форсирует пересчет
+            console.log("Leaflet размер обновлен");
+          }
+        }, 300);
+      });
+    }
   }
-
-  if (tg?.HapticFeedback) {
-    tg.HapticFeedback.selectionChanged();
+  else if (tab === 'locations') {
+    const locScreen = document.getElementById('screenLocations');
+    if (locScreen) {
+      locScreen.classList.remove('hidden');
+      if (typeof initLocationsScreen === 'function') initLocationsScreen();
+    }
+  }
+  else {
+    // Если вкладка не найдена, возвращаем на главный экран
+    const home = document.getElementById('screenHome');
+    if (home) home.classList.remove('hidden');
+    showToast('🚧 Раздел в разработке...');
   }
 }
 
@@ -212,43 +240,8 @@ function loadServerHistory() {
   }, 800);
 }
 
-// ── Инициализация приложения ──
-document.addEventListener('DOMContentLoaded', () => {
-  startLobbyTimers();
-
-  document.getElementById('walletBadge').addEventListener('click', () => {    
-    if (walletConnected) {
-      showToast('💰 Кошелёк уже подключён');
-      return;
-    }
-    showToast('🔗 Подключаем TON-кошелёк...');
-    setTimeout(() => {
-      walletConnected = true;
-      document.querySelector('.wallet-dot').classList.add('connected');
-      document.getElementById('walletShort').textContent = 'UQAb...f3Kp';
-      showToast('✅ Кошелёк подключён!');
-      if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-    }, 1200);
-  });
-  
-  // Анимируем счётчики банков при загрузке
-  setTimeout(() => {
-    animateCounter(document.getElementById('weeklyAmount'),  1284.50);
-    animateCounter(document.getElementById('monthlyAmount'), 8742.00, 1600);
-  }, 300);
-
-  // Приветствие от бота
-  const user = tg?.initDataUnsafe?.user;
-  if (user?.first_name) {
-    setTimeout(() => showToast(`Добро пожаловать, ${user.first_name}! 💩`), 800);
-  }
-
-  // Запуск загрузки истории игр
-  loadServerHistory();
-});
-
 // ── Анимации всплесков частиц какашек ──
-function createPoopSplash(event, cardElement) {
+function playPoopSplash(event, cardElement) {
   const toiletImg = cardElement.querySelector('.lobby-icon img, .lobby-card img, [src*="taz"]');
   let centerX, centerY;
   
@@ -290,39 +283,39 @@ function createPoopSplash(event, cardElement) {
   }
 }
 
-function playPoopSplash(event, cardElement) {
-  const toiletNode = cardElement.querySelector('.lobby-toilet');
-  if (!toiletNode) return;
+// ── Инициализация приложения ──
+document.addEventListener('DOMContentLoaded', () => {
+  startLobbyTimers();
 
-  const cardRect = cardElement.getBoundingClientRect();
-  const toiletRect = toiletNode.getBoundingClientRect();
+  document.getElementById('walletBadge').addEventListener('click', () => {    
+    if (walletConnected) {
+      showToast('💰 Кошелёк уже подключён');
+      return;
+    }
+    showToast('🔗 Подключаем TON-кошелёк...');
+    setTimeout(() => {
+      walletConnected = true;
+      document.querySelector('.wallet-dot').classList.add('connected');
+      document.getElementById('walletShort').textContent = 'UQAb...f3Kp';
+      showToast('✅ Кошелёк подключён!');
+      if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+    }, 1200);
+  });
   
-  const centerX = (toiletRect.left - cardRect.left) + (toiletRect.width / 2);
-  const centerY = (toiletRect.top - cardRect.top) + (toiletRect.height / 2);
+  // Анимируем счётчики банков при загрузке
+  setTimeout(() => {
+    animateCounter(document.getElementById('weeklyAmount'),  1284.50);
+    animateCounter(document.getElementById('monthlyAmount'), 8742.00, 1600);
+  }, 300);
 
-  const particleCount = 8; 
-  const items = ['💩', '🟤', '💦'];
-
-  for (let i = 0; i < particleCount; i++) {
-    const p = document.createElement('div');
-    p.className = 'poop-splash-particle';
-    p.textContent = items[Math.floor(Math.random() * items.length)];
-
-    const angle = Math.random() * Math.PI * 2;
-    const distance = 35 + Math.random() * 55;
-    
-    const tx = Math.cos(angle) * distance;
-    const ty = Math.sin(angle) * distance - 15; 
-    const rot = Math.random() * 360;
-
-    p.style.setProperty('--tx', `${tx}px`);
-    p.style.setProperty('--ty', `${ty}px`);
-    p.style.setProperty('--rot', `${rot}deg`);
-
-    p.style.left = `${centerX - 10}px`;
-    p.style.top = `${centerY - 10}px`;
-
-    cardElement.appendChild(p);
-    p.addEventListener('animationend', () => p.remove());
+  // Приветствие от бота
+  const user = tg?.initDataUnsafe?.user;
+  if (user?.first_name) {
+    setTimeout(() => showToast(`Добро пожаловать, ${user.first_name}! 💩`), 800);
   }
-}
+
+  // Запуск загрузки истории игр
+  loadServerHistory();
+});
+
+

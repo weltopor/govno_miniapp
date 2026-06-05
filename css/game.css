@@ -209,19 +209,23 @@
 .toilets-wrap {
   flex: 1;
   overflow: hidden;
+  display: flex;
   padding: 6px 8px 4px;
 }
 .toilets-wrap::-webkit-scrollbar { display: none; }
 
 .toilet-grid {
   display: grid;
-  gap: 4px;
+  grid-template-columns: repeat(4, 1fr);
+  grid-auto-rows: 1fr;
+  gap: 5px;
   width: 100%;
   height: 100%;
 }
 
 .t-cell {
   border-radius: 9px;
+  min-height: 0;
   display: flex !important;
   flex-direction: column !important;
   align-items: center !important;

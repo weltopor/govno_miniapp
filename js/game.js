@@ -53,8 +53,8 @@ let state = {
 
 // ── СЕТКА ──
 function getGridCols(p) {
-  if (p <= 5)  return 2;
-  if (p <= 7)  return 3;
+  if (p <= 3)  return 2;
+  if (p <= 6)  return 3;
   if (p <= 12) return 4;
   return 5;
 }

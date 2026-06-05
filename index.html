@@ -3,16 +3,18 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-  <title>GOVNO ne TONet</title>
+  <title>GOVNO neTONet</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Cinzel:wght@400;600;700&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
   
   <link rel="stylesheet" href="css/style.css"/>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <link rel="stylesheet" href="css/maps.css"/> <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script> 
+  <link rel="stylesheet" href="css/maps.css"/> <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <link rel="stylesheet" href="css/locations.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet"> 
 </head>
-<body>
+<body data-theme="dark">
 
   <div class="bg-layer">    
     <div class="steam" id="s1"></div>
@@ -20,12 +22,25 @@
     <div class="steam" id="s3"></div>
   </div>
 
+  
   <header class="app-header">
-    <div class="logo-glow-bg"></div>
-    <img src="img/logo.png" class="logo-img" alt="GOVNO ne TONet">
-    <div class="wallet-badge" id="walletBadge">
-      <span class="wallet-dot"></span>
-      <span id="walletShort">Кошелёк</span>
+    <div class="header-logo">
+      <div class="logo-coin-group">
+        <div class="logo-coin"><span>💩</span></div>
+        <span class="lc-label">Ʞ@K</span>
+      </div>
+      <div class="logo-title-group">
+        <span class="lt-line1">$GOVNO</span>
+        <span class="lt-line2">neTONet</span>
+      </div>
+      <div class="logo-toilet-group">
+        <span class="lg-toilet">🚽</span>
+        <span class="lg-fly">🪰</span>
+      </div>
+    </div>
+    <div class="theme-toggle-pill">
+      <button class="ttp-btn" data-t="light" onclick="setTheme('light')">☀️ Светлая</button>
+      <button class="ttp-btn active" data-t="dark" onclick="setTheme('dark')">🌙 Тёмная</button>
     </div>
   </header>
 
@@ -33,27 +48,31 @@
 
     <section class="banks-row">
       <div class="bank-card bank-weekly">
-        <div class="bank-gear">⚙</div>
-        <div class="bank-content">
-          <div class="bank-label">💀 НЕДЕЛЬНЫЙ БАНК</div>
-          <div class="bank-amount" id="weeklyAmount">1 284.50</div>
-          <div class="bank-currency">GOVNO</div>
-          <div class="bank-timer" id="weeklyTimer">⏳ через 4д 12ч</div>
-          <div class="bank-entry">🧻 10 билетов — вход</div>
-        </div>        
+        <div class="bank-title">Недельный Банк</div>
+        <div class="bank-poop">💩</div>
+        <div class="bank-amount" id="weeklyAmount">4,875.5</div>
+        <div class="bank-currency">💩 К@К@H</div>
+        <div class="bank-timer bank-timer-red" id="weeklyTimer">⏰ 15:43:21</div>
       </div>
-
       <div class="bank-card bank-monthly">
-        <div class="bank-gear">⚙</div>
-        <div class="bank-content">
-          <div class="bank-label">👑 МЕСЯЧНЫЙ БАНК</div>
-          <div class="bank-amount" id="monthlyAmount">8 742.00</div>
-          <div class="bank-currency">GOVNO</div>
-          <div class="bank-timer" id="monthlyTimer">⏳ 1 июня 00:00</div>
-          <div class="bank-entry">🧻 20 билетов — вход</div>
-        </div>        
+        <div class="bank-title">Месячный Банк</div>
+        <div class="bank-poop">💩</div>
+        <div class="bank-amount" id="monthlyAmount">19,502.1</div>
+        <div class="bank-currency">💩 К@К@H</div>
+        <div class="bank-timer" id="monthlyTimer">📅 01.07.2026</div>
       </div>
     </section>
+
+    <div class="balance-bar">
+      <div class="bb-left">
+        <div class="bb-coin">💩</div>
+        <div class="bb-info">
+          <div class="bb-label">БАЛАНС</div>
+          <div class="bb-amount"><span id="balanceAmount">25.75</span> <span class="bb-cur">💩 К@К@H</span></div>
+        </div>
+      </div>
+      <button class="wallet-btn" id="walletBadge" onclick="connectWallet()">💼 КОШЕЛЁК</button>
+    </div>
 
     <section class="lobbies-section">
       <div class="section-title">
@@ -62,74 +81,69 @@
         <span class="title-line"></span>
       </div>
 
-      <div class="lobby-card" data-nominal="0.5" data-players="2" onclick="playPoopSplash(event, this)">
-        <div class="lobby-left">
-          <div class="lobby-toilet">🚽</div>
-          <div class="lobby-info">
-            <div class="lobby-nominal">0.5 <span class="lobby-cur">GOVNO</span></div>
-            <div class="lobby-timer-row">
-              <span class="lobby-timer-dot"></span>
-              <span class="lobby-timer-txt">Старт через 06:23</span>
-            </div>
-          </div>
-        </div>
-        <div class="lobby-right">
-          <div class="lobby-slots">
-            <span class="slots-filled">1</span><span class="slots-sep">/</span><span class="slots-max">2</span>
-            <span class="slots-label">мест</span>
-          </div>
-          <div class="slots-bar"><div class="slots-fill" style="width:50%"></div></div>
-          <button class="join-btn" onclick="joinLobby(this, 0.5)">
-            <span class="btn-icon">🚽</span> ВОЙТИ
-          </button>
-        </div>
-      </div>
+      <div class="lobby-section-hdr">
+  <span class="lsh-title">ЛОББИ ИГР</span>
+  <button class="lsh-info-btn">ℹ</button>
+</div>
 
-      <div class="lobby-card" data-nominal="1" data-players="5" onclick="playPoopSplash(event, this)">
-        <div class="lobby-left">
-          <div class="lobby-toilet">🚽</div>
-          <div class="lobby-info">
-            <div class="lobby-nominal">1 <span class="lobby-cur">GOVNO</span></div>
-            <div class="lobby-timer-row">
-              <span class="lobby-timer-dot"></span>
-              <span class="lobby-timer-txt">Старт через 06:23</span>
-            </div>
-          </div>
-        </div>
-        <div class="lobby-right">
-          <div class="lobby-slots">
-            <span class="slots-filled">3</span><span class="slots-sep">/</span><span class="slots-max">5</span>
-            <span class="slots-label">мест</span>
-          </div>
-          <div class="slots-bar"><div class="slots-fill" style="width:60%"></div></div>
-          <button class="join-btn" onclick="joinLobby(this, 1)">
-            <span class="btn-icon">🚽</span> ВОЙТИ
-          </button>
+    <div class="lobby-card-new" data-nominal="0.5" data-players="10"
+     onclick="playPoopSplash(event, this)">
+      <div class="lcn-poop">💩</div>
+      <div class="lcn-info">
+        <div class="lcn-title">ЛОББИ #1: <span class="lcn-nom">0.5 К@К@H</span></div>
+        <div class="lcn-meta">
+          👥 <span class="slots-filled">1</span>/10 · ⏰ Старт через 06:23
         </div>
       </div>
+      <div class="lcn-right">
+        <button class="btn-join" onclick="joinLobby(this, 0.5)">ВОЙТИ</button>
+        <div class="lcn-reward">НАГРАДА 💩 1 К@К@H</div>
+      </div>
+    </div>
 
-      <div class="lobby-card" data-nominal="2" data-players="10" onclick="playPoopSplash(event, this)">
-        <div class="lobby-left">
-          <div class="lobby-toilet">🚽</div>
-          <div class="lobby-info">
-            <div class="lobby-nominal">2 <span class="lobby-cur">GOVNO</span></div>
-            <div class="lobby-timer-row">
-              <span class="lobby-timer-dot"></span>
-              <span class="lobby-timer-txt">Старт через 06:23</span>
-            </div>
-          </div>
-        </div>
-        <div class="lobby-right">
-          <div class="lobby-slots">
-            <span class="slots-filled">1</span><span class="slots-sep">/</span><span class="slots-max">10</span>
-            <span class="slots-label">мест</span>
-          </div>
-          <div class="slots-bar"><div class="slots-fill" style="width:10%"></div></div>
-          <button class="join-btn" onclick="joinLobby(this, 2)">
-            <span class="btn-icon">🚽</span> ВОЙТИ
-          </button>
-        </div>
+    <div class="lobby-card-new" data-nominal="1.0" data-players="10"
+     onclick="playPoopSplash(event, this)">
+      <div class="lcn-poop">💩</div>
+      <div class="lcn-info">
+        <div class="lcn-title">ЛОББИ #2: <span class="lcn-nom">1.0 К@К@H</span></div>
+        <div class="lcn-meta">👥 3/10 · ⏰ Старт через 06:23</div>
       </div>
+      <div class="lcn-right">
+        <button class="btn-join" onclick="joinLobby(this, 1.0)">ВОЙТИ</button>
+        <div class="lcn-reward">НАГРАДА 💩 2 К@К@H</div>
+      </div>
+    </div>
+
+    <div class="lobby-card-new" data-nominal="2.0" data-players="10"
+     onclick="playPoopSplash(event, this)">
+      <div class="lcn-poop">💩</div>
+      <div class="lcn-info">
+        <div class="lcn-title">ЛОББИ #3: <span class="lcn-nom">2.0 К@К@H</span></div>
+        <div class="lcn-meta">👥 1/10 · ⏰ Старт через 06:23</div>
+      </div>
+      <div class="lcn-right">
+        <button class="btn-join" onclick="joinLobby(this, 2.0)">ВОЙТИ</button>
+        <div class="lcn-reward">НАГРАДА 💩 4 К@К@H</div>
+      </div>
+    </div>
+
+    <div class="bonus-row">
+      <button class="bonus-btn bonus-daily" onclick="showToast('🚧 Скоро!')">
+        <span class="bbs-icon">🎁</span>
+        <div class="bbs-text">
+          <div class="bbs-title">ЕЖЕДНЕВНЫЙ БОНУС</div>
+          <div class="bbs-amount">💩 1 К@К@H</div>
+        </div>
+      </button>
+      <button class="bonus-btn bonus-invite" onclick="showToast('🚧 Скоро!')">
+        <span class="bbs-icon">👥</span>
+        <div class="bbs-text">
+          <div class="bbs-title">ПРИГЛАСИ ДРУГА</div>
+          <div class="bbs-amount">💩 +2 К@К@H</div>
+        </div>
+      </button>
+    </div>  
+
     </section>
 
     <section class="history-section" style="margin-top: 25px; padding: 0 16px;">
@@ -146,28 +160,13 @@
     </section>
   </main>
 
-  <main class="app-main screen-section hidden" id="screenMap" style="padding: 0;">
+  <main class="app-main screen-section hidden" id="mapScreen" style="padding: 0;">
     <div class="map-wrapper">
       <div id="mapContainer"></div>
-      
-      <div class="map-shop-sidebar">
-        <div class="shop-item active-build" data-type="taz" onclick="selectBuildObject('taz', this)">
-          <div class="shop-icon">🚽</div>
-          <span class="shop-name">Кабинка</span>
-        </div>
-        <div class="shop-item" data-type="gold" onclick="selectBuildObject('gold', this)">
-          <div class="shop-icon">👑</div>
-          <span class="shop-name">Золотой</span>
-        </div>
-        <div class="shop-item" data-type="super" onclick="selectBuildObject('super', this)">
-          <div class="shop-icon">⚡</div>
-          <span class="shop-name">Супер</span>
-        </div>
-      </div>
-
+            
       <div class="map-overlay-container">
         <div class="map-overlay-info" id="mapOverlayHint">
-          <span>Выберите объект слева для установки 🛠️</span>
+          <span>Выберите свободное место на карте 🚽</span>
         </div>
       </div>
 
@@ -176,6 +175,51 @@
       </button>
 
     </div>
+  </main>
+
+  <main class="app-main screen-section hidden" id="screenLocations">
+ 
+    <!-- Баланс игрока -->
+    <div class="loc-header-bar">
+      <div class="loc-balance-item">
+        <span class="loc-balance-label">🧻 Рулоны</span>
+        <span class="loc-balance-val" id="locBalanceRolls">7</span>
+      </div>
+      <div class="loc-divider"></div>
+      <div class="loc-balance-item">
+        <span class="loc-balance-label">🟤 Кусочки</span>
+        <span class="loc-balance-val" id="locBalancePieces">42</span>
+      </div>
+      <div class="loc-divider"></div>
+      <div class="loc-balance-item">
+        <span class="loc-balance-label">💩 GOVNO</span>
+        <span class="loc-balance-val green" id="locBalanceGovno">1284.50</span>
+      </div>
+    </div>
+  
+    <!-- Фильтры типов событий -->
+    <div class="loc-filters">      
+      <button class="loc-filter-btn" data-filter="ordinary" onclick="setLocFilter('ordinary')">
+        <span class="filter-dot filter-dot-ord"></span> Обычные
+      </button>
+      <button class="loc-filter-btn" data-filter="large" onclick="setLocFilter('large')">
+        <span class="filter-dot filter-dot-large"></span> Крупные
+      </button>
+      <button class="loc-filter-btn" data-filter="massive" onclick="setLocFilter('massive')">
+        <span class="filter-dot filter-dot-mass"></span> Масштабные
+      </button>
+      <button class="loc-filter-btn" data-filter="global" onclick="setLocFilter('global')">
+        <span class="filter-dot filter-dot-glob"></span> Глобальные
+      </button>
+    </div>
+  
+    <!-- Список 12 событий -->
+    <div class="loc-list" id="locList">
+      <div style="text-align:center; color:var(--text-gold); padding:20px;">
+        ⏳ Загрузка событий...
+      </div>
+    </div>
+  
   </main>
 
   <nav class="bottom-nav">
@@ -187,7 +231,7 @@
       <img class="nav-icon-img" src="img/icons/nav-navi.png" alt="">
       <span class="nav-label">Карта</span>
     </button>
-    <button class="nav-btn" onclick="switchTab(this,'rating')">
+    <button class="nav-btn" onclick="switchTab(this,'locations')">
       <img class="nav-icon-img" src="img/icons/nav-rating.png" alt="">
       <span class="nav-label">Рейтинг</span>
     </button>
@@ -197,6 +241,8 @@
     </button>
   </nav>
 
-  <script src="js/maps.js"></script> <script src="js/app.js"></script>
+  <script src="js/maps.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/locations.js"></script>
 </body>
 </html>
